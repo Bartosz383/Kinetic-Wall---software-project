@@ -12,3 +12,16 @@ Stworzona przez nas instalacja ma być interaktywna. Podchodzący do niej człow
 - Stworzenie skończonej ilości animacji wykonywanych przez silniki,
 - System dynamicznego reagowania silników na obraz człowieka,
 - Moduł interface użytkownika
+
+## Co nam może się przydać?
+- Środowisko programistyczne do Pythona:
+  - PyCharm,
+  - VS Code,
+  - Jupiter,
+  - Atom,
+  - lub inny
+- System kontroli wersji:
+  - git (obowiązkowo, wystarczy jeżeli lubicie pisać w konsoli)
+  - GitHub Desktop, Pycharm itp. (jeżeli wolicie obsługę przez GUI)
+- Issues na GitHub lub Trello do prowadzenia projektu
+
