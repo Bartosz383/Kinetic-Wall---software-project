@@ -53,8 +53,10 @@ class DisplayWindow(tk.Tk):
         self.create_button(buttons_frame, "Przesun w lewo", self.shift_left)
         self.create_button(buttons_frame, "Przesun w prawo", self.shift_right)
         self.create_button(buttons_frame, "Animuj", self.animate)
+        self.create_button(buttons_frame, "Animuj kilka razy", self.animate_loop)
 
         self.show_display()
+
 
     def create_button(self, parent, text, command):
         button = tk.Button(parent, text=text, command=command)
@@ -202,10 +204,51 @@ class DisplayWindow(tk.Tk):
         self.segments = [row[-n:] + row[:-n] for row in self.segments]
         self.show_display()
 
-    def animate(self):
-       pass
+    def animate(self, col=31):
+        if col >= 0:
+            self.shift_right(1)
+            self.after(100, self.animate, col - 1)
+        else:
+            self.shift_right(0)
+
+    def animate_loop(self, col=62):
+        if col >= 0:
+            self.shift_right(1)
+            self.after(100, self.animate, col - 1)
+            self.shift_right(1)
+        else:
+            self.shift_right(0)
 
 
+
+
+
+
+# class App(tk.Tk):
+#     def __init__(self, title="Aplikacja"):
+#         super().__init__() # konstruktor Tk
+#         #super().option_add("*font", "Helvetica 24")
+#         self.title(title)  # ustaw tytuł
+#         self.center()      # wyśrodkuj
+#
+#     def run(self): self.mainloop()
+#
+#     def center(self):
+#         self.update()
+#         # szerokość / wysokość okna
+#         wx = self.winfo_width()
+#         wy = self.winfo_height()
+#         # szerokość wysokość ekranu
+#         sx = self.winfo_screenwidth()
+#         sy = self.winfo_screenheight()
+#         # środek ekranu przesunięty o
+#         x = (sx - wx) // 2 # połowę szerokośi
+#         y = (sy - wy) // 2 # połowę wysokości
+#
+#         self.geometry("{}x{}+{}+{}".format(wx, wy, x, y))
+#
 if __name__ == "__main__":
     display_window = DisplayWindow(modul_name="Wszystkie moduły")
     display_window.mainloop()
+    # app = App("Appka")
+    # app.run()
