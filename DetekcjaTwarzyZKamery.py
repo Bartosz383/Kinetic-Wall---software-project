@@ -1,6 +1,7 @@
 import cv2
 import tkinter as tk
 from Wyswietlacz import DisplayWindow
+import time
 
 def initialize_cascade():
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
@@ -24,14 +25,19 @@ def detect_faces(frame, face_cascade, display_window):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
 
-    for x, y, w, h in faces:
-        img = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
-        print("Jest twarz na zdjęciu")
+    if len(faces) > 0:
+        for x, y, w, h in faces:
+            img = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
+            print("Jest twarz na zdjęciu")
 
-        # Wywołaj funkcję animate_wave z modułu Wyswietlacz
-        display_window.Freelab_text() # Dodaj argumenty, jeśli są potrzebne
+        # Wywołaj funkcję wall_function z opóźnieniem
+        display_window.after(1000, wall_function, display_window)
 
     return frame
+
+def wall_function(display_window):
+    # Wywołaj funkcję Freelab_text po upływie 4 sekund
+    display_window.Freelab_text()
 
 def process_video(video, face_cascade, display_window):
     check, frame = video.read()
@@ -49,7 +55,7 @@ def process_video(video, face_cascade, display_window):
         return
 
     # Cykliczne sprawdzanie klatek z użyciem after
-    display_window.after(10, process_video, video, face_cascade, display_window)
+    display_window.after(1, process_video, video, face_cascade, display_window)
 
 def main_detect():
     face_cascade = initialize_cascade()
