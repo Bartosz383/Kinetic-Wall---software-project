@@ -2,8 +2,34 @@ import cv2
 import tkinter as tk
 from Wyswietlacz import DisplayWindow
 import time
+import random
+
+def wall_function(display_window):
+    """
+    Losuje i wykonuje jedną z funkcji z listy.
+    """
+    list_of_functions = [
+        # display_window.set_all_segments_to_zero,
+        # display_window.set_all_segments_to_one,
+        display_window.set_segments_to_pattern,
+        # display_window.animate_wave,
+        # display_window.animate_double_wave,
+        display_window.Freelab_text,
+        display_window.shift_down,
+        display_window.shift_up,
+        display_window.shift_left,
+        display_window.shift_right,
+        # display_window.animate,
+        # display_window.animate_loop
+    ]
+
+    random_function = random.choice(list_of_functions)
+    random_function()
 
 def initialize_cascade():
+    """
+    Inicjalizuje kaskadę do detekcji twarzy.
+    """
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
     if face_cascade.empty():
@@ -13,6 +39,9 @@ def initialize_cascade():
     return face_cascade
 
 def initialize_camera():
+    """
+    Inicjalizuje kamerę.
+    """
     video = cv2.VideoCapture(0)
 
     if not video.isOpened():
@@ -22,6 +51,9 @@ def initialize_camera():
     return video
 
 def detect_faces(frame, face_cascade, display_window):
+    """
+    Detekuje twarze na obrazie i wywołuje wall_function z opóźnieniem.
+    """
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
 
@@ -31,15 +63,14 @@ def detect_faces(frame, face_cascade, display_window):
             print("Jest twarz na zdjęciu")
 
         # Wywołaj funkcję wall_function z opóźnieniem
-        display_window.after(1000, wall_function, display_window)
+        display_window.after(10, wall_function, display_window)
 
     return frame
 
-def wall_function(display_window):
-    # Wywołaj funkcję Freelab_text po upływie 4 sekund
-    display_window.Freelab_text()
-
 def process_video(video, face_cascade, display_window):
+    """
+    Przetwarza strumień wideo i wyświetla obrazy z detekcją twarzy.
+    """
     check, frame = video.read()
 
     if not check:
