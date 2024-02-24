@@ -1,30 +1,38 @@
 import cv2
-import tkinter as tk
 from Wyswietlacz import DisplayWindow
-import time
+import Object_tracking
+from Object_tracking import pattern
 import random
 
-def wall_function(display_window):
+def wall_function(display_window, x, y):
     """
     Losuje i wykonuje jedną z funkcji z listy.
     """
     list_of_functions = [
         # display_window.set_all_segments_to_zero,
         # display_window.set_all_segments_to_one,
-        display_window.set_segments_to_pattern,
+        # display_window.set_segments_to_pattern,
         # display_window.animate_wave,
         # display_window.animate_double_wave,
-        display_window.Freelab_text,
-        display_window.shift_down,
-        display_window.shift_up,
-        display_window.shift_left,
-        display_window.shift_right,
+        # display_window.Freelab_text,
+        # display_window.shift_down,
+        # display_window.shift_up,
+        # display_window.shift_left,
+        # display_window.shift_right,
         # display_window.animate,
-        # display_window.animate_loop
+        # display_window.animate_loop,
+        # display_window.Module_0_On,
+        display_window.zmien_modul  # I noticed you're already using this one
     ]
 
     random_function = random.choice(list_of_functions)
-    random_function()
+
+    # Call the function with appropriate parameters
+    if random_function == display_window.zmien_modul:
+        random_function(x, y)
+    else:
+        random_function()
+
 
 def initialize_cascade():
     """
@@ -48,7 +56,14 @@ def initialize_camera():
         print("Error opening video stream.")
         exit()
 
+    # Pobierz rozmiar klatki
+    frame_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    print(f"Rozmiar klatki: {frame_width}x{frame_height}")
+
     return video
+
 
 def detect_faces(frame, face_cascade, display_window):
     """
@@ -59,13 +74,25 @@ def detect_faces(frame, face_cascade, display_window):
 
     if len(faces) > 0:
         for x, y, w, h in faces:
-            img = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
-            print("Jest twarz na zdjęciu")
+            img = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
-        # Wywołaj funkcję wall_function z opóźnieniem
-        display_window.after(10, wall_function, display_window)
+            # Przekształć współrzędne
+            transformed_x, transformed_y = transform_coordinates(x, y)
+
+            print(f"Twarz na przekształconej pozycji X: {transformed_x}, Y: {transformed_y}")
+
+            # Wywołaj funkcję wall_function z przekształonymi współrzędnymi
+            display_window.after(10, wall_function, display_window, transformed_x, transformed_y)
 
     return frame
+
+def transform_coordinates(x, y):
+    """
+    Przekształca współrzędne x i y z zakresu 0-640 i 0-480 na zakres 0-28 i 0-12.
+    """
+    transformed_x = (x / 640) * 28
+    transformed_y = (y / 480) * 12
+    return transformed_x, transformed_y
 
 def process_video(video, face_cascade, display_window):
     """
@@ -86,7 +113,7 @@ def process_video(video, face_cascade, display_window):
         return
 
     # Cykliczne sprawdzanie klatek z użyciem after
-    display_window.after(1, process_video, video, face_cascade, display_window)
+    display_window.after(1000, process_video, video, face_cascade, display_window)
 
 def main_detect():
     face_cascade = initialize_cascade()
