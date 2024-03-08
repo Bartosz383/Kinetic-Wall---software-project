@@ -1,7 +1,7 @@
 import cv2
 from Wyswietlacz import DisplayWindow
 import Object_tracking
-from Object_tracking import pattern
+# from Object_tracking import pattern
 import random
 
 def wall_function(display_window, x, y):
