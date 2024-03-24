@@ -1,28 +1,18 @@
 import cv2
 from Wyswietlacz import DisplayWindow
-import Object_tracking
-# from Object_tracking import pattern
 import random
+import mediapipe as mp
+import time
+
+mpFaceDetection = mp.solutions.face_detection
+faceDetection = mpFaceDetection.FaceDetection(0.75)
 
 def wall_function(display_window, x, y):
     """
     Losuje i wykonuje jedną z funkcji z listy.
     """
     list_of_functions = [
-        # display_window.set_all_segments_to_zero,
-        # display_window.set_all_segments_to_one,
-        # display_window.set_segments_to_pattern,
-        # display_window.animate_wave,
-        # display_window.animate_double_wave,
-        # display_window.Freelab_text,
-        # display_window.shift_down,
-        # display_window.shift_up,
-        # display_window.shift_left,
-        # display_window.shift_right,
-        # display_window.animate,
-        # display_window.animate_loop,
-        # display_window.Module_0_On,
-        display_window.zmien_modul  # I noticed you're already using this one
+        display_window.zmien_modul
     ]
 
     random_function = random.choice(list_of_functions)
@@ -33,58 +23,45 @@ def wall_function(display_window, x, y):
     else:
         random_function()
 
-
-def initialize_cascade():
+def detect_faces(video, display_window, prev_time):
     """
-    Inicjalizuje kaskadę do detekcji twarzy.
+    Detekuje twarze na obrazie i wywołuje wall_function z przekształconymi współrzędnymi twarzy.
     """
-    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+    check, frame = video.read()
 
-    if face_cascade.empty():
-        print("Error loading face cascade.")
-        exit()
+    if not check:
+        print("Error reading video frame.")
+        return
 
-    return face_cascade
+    imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = faceDetection.process(imgRGB)
 
-def initialize_camera():
-    """
-    Inicjalizuje kamerę.
-    """
-    video = cv2.VideoCapture(0)
+    if results.detections:
+        for detection in results.detections:
+            bboxC = detection.location_data.relative_bounding_box
+            ih, iw, ic = frame.shape
+            bbox = int(bboxC.xmin * iw), int(bboxC.ymin * ih), \
+                   int(bboxC.width * iw), int(bboxC.height * ih)
 
-    if not video.isOpened():
-        print("Error opening video stream.")
-        exit()
-
-    # Pobierz rozmiar klatki
-    frame_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    print(f"Rozmiar klatki: {frame_width}x{frame_height}")
-
-    return video
-
-
-def detect_faces(frame, face_cascade, display_window):
-    """
-    Detekuje twarze na obrazie i wywołuje wall_function z opóźnieniem.
-    """
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
-
-    if len(faces) > 0:
-        for x, y, w, h in faces:
-            img = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+            # Rysowanie ramki wokół twarzy
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (0, 255, 0), 2)
 
             # Przekształć współrzędne
-            transformed_x, transformed_y = transform_coordinates(x, y)
-
-            print(f"Twarz na przekształconej pozycji X: {transformed_x}, Y: {transformed_y}")
+            transformed_x, transformed_y = transform_coordinates(bbox[0], bbox[1])
 
             # Wywołaj funkcję wall_function z przekształonymi współrzędnymi
-            display_window.after(10, wall_function, display_window, transformed_x, transformed_y)
+            wall_function(display_window, transformed_x, transformed_y)
 
-    return frame
+    # Wyświetlenie liczby klatek na sekundę (FPS)
+    fps, prev_time = calculate_fps(prev_time)
+    cv2.putText(frame, f'FPS: {int(fps)}', (20, 70), cv2.FONT_HERSHEY_PLAIN,
+                3, (0, 255, 0), 2)
+
+    # Wyświetlenie obrazu z ramkami i liczbą FPS
+    cv2.imshow("Detected Faces", frame)
+
+    # Cykliczne sprawdzanie klatek z użyciem after
+    display_window.after(10, detect_faces, video, display_window, prev_time)
 
 def transform_coordinates(x, y):
     """
@@ -94,36 +71,24 @@ def transform_coordinates(x, y):
     transformed_y = (y / 480) * 12
     return transformed_x, transformed_y
 
-def process_video(video, face_cascade, display_window):
+def calculate_fps(prev_time):
     """
-    Przetwarza strumień wideo i wyświetla obrazy z detekcją twarzy.
+    Oblicza liczbę klatek na sekundę (FPS) w kontekście przetwarzania strumienia wideo.
     """
-    check, frame = video.read()
-
-    if not check:
-        print("Error reading video frame.")
-        return
-
-    frame_with_faces = detect_faces(frame, face_cascade, display_window)
-
-    cv2.imshow("Detected Faces", frame_with_faces)
-    key = cv2.waitKey(10)
-
-    if key == ord('q'):
-        return
-
-    # Cykliczne sprawdzanie klatek z użyciem after
-    display_window.after(1000, process_video, video, face_cascade, display_window)
+    current_time = time.time()
+    fps = 1 / (current_time - prev_time) if current_time != prev_time else 0
+    return fps, current_time
 
 def main_detect():
-    face_cascade = initialize_cascade()
-    video = initialize_camera()
+    video = cv2.VideoCapture(0)
 
     # Utwórz obiekt DisplayWindow
     wyswietlacz = DisplayWindow("Moje Okno")
 
-    # Wywołaj funkcję process_video, aby rozpocząć cykliczne przetwarzanie wideo
-    wyswietlacz.after(10, process_video, video, face_cascade, wyswietlacz)
+    prev_time = time.time()
+
+    # Rozpocznij detekcję twarzy
+    detect_faces(video, wyswietlacz, prev_time)
 
     wyswietlacz.mainloop()
 
