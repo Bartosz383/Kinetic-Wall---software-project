@@ -42,13 +42,13 @@ class DisplayWindow(tk.Tk):
         self.create_pattern()
 
         buttons_frame = tk.Frame(self)
-        buttons_frame.grid(row=0, column=1, rowspan=5, padx=10)
+        buttons_frame.grid(row=0, column=1, rowspan=5, padx=5)
 
         self.create_button(buttons_frame, "Ustaw wszystko na 0", self.set_all_segments_to_zero)
         self.create_button(buttons_frame, "Ustaw wszystko na 1", self.set_all_segments_to_one)
         self.create_button(buttons_frame, "Ustaw według wzoru", self.set_segments_to_pattern)
-        self.create_button(buttons_frame, "Animuj falę", self.animate_wave)
-        self.create_button(buttons_frame, "Animuj podwójną falę", self.animate_double_wave)
+        # self.create_button(buttons_frame, "Animuj falę", self.animate_wave)
+        # self.create_button(buttons_frame, "Animuj podwójną falę", self.animate_double_wave)
         self.create_button(buttons_frame, "Wyświetl napis Freelab", self.Freelab_text)
         self.create_button(buttons_frame, "Przesun w dół", self.shift_down)
         self.create_button(buttons_frame, "Przesun w górę", self.shift_up)
