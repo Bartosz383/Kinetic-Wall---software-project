@@ -71,10 +71,16 @@ class DrawingApp:
         if self.drawings_library:
             print("Drawings in library:")
             for name, drawing in self.drawings_library:
-                print("- Name:", name)
-                print("  Drawing:", drawing)
+                print("def ", name, "(self):")
+                print("    pattern = [")
+                for row in drawing:
+                    print("        " + str(row) + ",")
+                print("    ]")
+                print("    self.segments = pattern")
+                print("    self.show_display(self.hex_size)")
         else:
             print("Library is empty.")
+
 
 def main():
     root = tk.Tk()
