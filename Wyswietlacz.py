@@ -3,6 +3,7 @@ import tkinter.messagebox as messagebox
 import tkinter.simpledialog as simpledialog
 import time
 import math
+from Rysownik import DrawingApp
 
 class DisplayWindow(tk.Tk):
     def __init__(self, modul_name):
@@ -44,6 +45,7 @@ class DisplayWindow(tk.Tk):
         buttons_frame = tk.Frame(self)
         buttons_frame.grid(row=0, column=1, rowspan=5, padx=5)
 
+        self.create_button(buttons_frame, "Rysuj", lambda: DrawingApp(self))
         self.create_button(buttons_frame, "Ustaw wszystko na 0", self.set_all_segments_to_zero)
         self.create_button(buttons_frame, "Ustaw wszystko na 1", self.set_all_segments_to_one)
         self.create_button(buttons_frame, "Ustaw według wzoru", self.set_segments_to_pattern)
