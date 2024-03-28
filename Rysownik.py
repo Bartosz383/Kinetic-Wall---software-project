@@ -16,33 +16,30 @@ class DrawingApp:
 
         self.canvas.bind("<B1-Motion>", self.draw_hex)  # rysowanie przy przeciśnięciu lewego przycisku myszy
 
-        # self.save_button = tk.Button(self.master, text="Save Image", command=self.save_image)
-        # self.save_button.grid(row=1, column=0)
+        self.add_to_library_button = tk.Button(self.master, text="Zapisz", command=self.add_to_library)
+        self.add_to_library_button.grid(row=1, column=0)
 
-        self.add_to_library_button = tk.Button(self.master, text="Dodaj do biblioteki", command=self.add_to_library)
-        self.add_to_library_button.grid(row=1, column=1)
-
-        self.display_library_button = tk.Button(self.master, text="Wyświetl bibliotekę", command=self.display_library)
-        self.display_library_button.grid(row=1, column=2)
+        self.display_library_button = tk.Button(self.master, text="Wyświetl zapisane", command=self.display_library)
+        self.display_library_button.grid(row=2, column=0)
 
         self.clear_button = tk.Button(self.master, text="Wyczyść wszystko", command=self.clear_canvas)
-        self.clear_button.grid(row=1, column=3)
+        self.clear_button.grid(row=3, column=0)
 
         self.close_button = tk.Button(self.master, text="Zamknij", command=self.close_window)
-        self.close_button.grid(row=1, column=4)
+        self.close_button.grid(row=4, column=0)
 
         self.draw_mode = True  # Początkowo tryb rysowania
 
-        self.draw_mode_button = tk.Button(self.master, text="Switch to Erase Mode", command=self.toggle_draw_mode)
-        self.draw_mode_button.grid(row=2, column=3)
+        self.draw_mode_button = tk.Button(self.master, text="Zmień na tryb mazania", command=self.toggle_draw_mode)
+        self.draw_mode_button.grid(row=5, column=0)
 
     def toggle_draw_mode(self):
         self.draw_mode = not self.draw_mode
         if self.draw_mode:
-            self.draw_mode_button.config(text="Switch to Erase Mode")
+            self.draw_mode_button.config(text="Zmień na tryb mazania")
             self.canvas.bind("<B1-Motion>", self.draw_hex)
         else:
-            self.draw_mode_button.config(text="Switch to Draw Mode")
+            self.draw_mode_button.config(text="Zmień na tryb rysowania")
             self.canvas.bind("<B1-Motion>", self.erase_hex)
 
     def draw_hex(self, event):

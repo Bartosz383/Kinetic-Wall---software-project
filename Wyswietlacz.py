@@ -5,6 +5,7 @@ import time
 import math
 from Rysownik import DrawingApp
 
+
 class DisplayWindow(tk.Tk):
     def __init__(self, modul_name):
         super().__init__()
@@ -13,13 +14,13 @@ class DisplayWindow(tk.Tk):
         self.geometry("1000x450")  # Zmieniony rozmiar okna
 
         # Inicjalizacja zmiennych do przechowywania stanu segmentów
-        #self.segments = [[0 for _ in range(32)] for _ in range(16)]
+        # self.segments = [[0 for _ in range(32)] for _ in range(16)]
 
         # Utworzenie canvas do rysowania segmentów
         self.canvas = tk.Canvas(self, width=800, height=600)  # Zmieniony rozmiar canvasa
         self.canvas.grid(row=0, column=0, rowspan=5)
 
-        self.hex_size = 15 # Rozmiar sześciokąta
+        self.hex_size = 15  # Rozmiar sześciokąta
 
         self.pattern = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -45,7 +46,7 @@ class DisplayWindow(tk.Tk):
         buttons_frame = tk.Frame(self)
         buttons_frame.grid(row=0, column=1, rowspan=5, padx=5)
 
-        self.create_button(buttons_frame, "Rysuj", lambda: DrawingApp(self))
+        self.create_button(buttons_frame, "Rysuj", self.open_drawing_app)
         self.create_button(buttons_frame, "Ustaw wszystko na 0", self.set_all_segments_to_zero)
         self.create_button(buttons_frame, "Ustaw wszystko na 1", self.set_all_segments_to_one)
         self.create_button(buttons_frame, "Ustaw według wzoru", self.set_segments_to_pattern)
@@ -62,10 +63,12 @@ class DisplayWindow(tk.Tk):
 
         self.show_display(self.hex_size)
 
+    def create_button(self, frame, text, command):
+        button = tk.Button(frame, text=text, command=command)
+        button.pack(side="top")
 
-    def create_button(self, parent, text, command):
-        button = tk.Button(parent, text=text, command=command)
-        button.pack(side=tk.TOP, pady=5)
+    def open_drawing_app(self):
+        DrawingApp(self)
 
     # def show_display(self):
     #     # Usunięcie istniejących prostokątów na canvasie
@@ -292,6 +295,7 @@ class DisplayWindow(tk.Tk):
 
         self.segments = pattern
         self.show_display(self.hex_size)
+
 
 if __name__ == "__main__":
     display_window = DisplayWindow(modul_name="Wszystkie moduły")
