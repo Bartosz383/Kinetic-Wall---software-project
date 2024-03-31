@@ -1,11 +1,6 @@
 import tkinter as tk
-import tkinter.messagebox as messagebox
-import tkinter.simpledialog as simpledialog
-import time
 import math
-from Rysownik import DrawingApp
-
-
+from tkinter import filedialog, simpledialog
 class DisplayWindow(tk.Tk):
     def __init__(self, modul_name):
         super().__init__()
@@ -21,6 +16,7 @@ class DisplayWindow(tk.Tk):
         self.canvas.grid(row=0, column=0, rowspan=5)
 
         self.hex_size = 15  # Rozmiar sześciokąta
+        self.drawings_library = []  # lista przechowująca rysunki
 
         self.pattern = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -66,9 +62,6 @@ class DisplayWindow(tk.Tk):
     def create_button(self, frame, text, command):
         button = tk.Button(frame, text=text, command=command)
         button.pack(side="top")
-
-    def open_drawing_app(self):
-        DrawingApp(self)
 
     # def show_display(self):
     #     # Usunięcie istniejących prostokątów na canvasie
@@ -296,8 +289,91 @@ class DisplayWindow(tk.Tk):
         self.segments = pattern
         self.show_display(self.hex_size)
 
+    def open_drawing_app(self):
+        self.drawing_app_window = tk.Toplevel(self)
+        self.drawing_app_window.title("Rysowanie")
+
+        self.hex_size = 15  # Rozmiar sześciokąta
+        hex_width = 3 / 2 * self.hex_size
+        hex_height = math.sqrt(3) * self.hex_size
+
+        self.canvas = tk.Canvas(self.drawing_app_window, width=32 * hex_width, height=16 * hex_height + 10)
+        self.canvas.pack(expand=tk.YES, fill=tk.BOTH)
+
+        self.canvas.bind("<Button-1>", self.paint_hex)
+        self.canvas.bind("<B1-Motion>", self.paint_hex)
+
+        # Przycisk do przełączania między rysowaniem a mazaniem
+        self.draw_mode = True  # Początkowy stan: rysowanie
+        self.mode_button = tk.Button(self.drawing_app_window, text="Rysuj", command=self.toggle_mode)
+        self.mode_button.pack()
+        self.clear_button = tk.Button(self.drawing_app_window, text="Wyczyść tablicę", command=self.clear_canvas)
+        self.clear_button.pack()
+        self.add_to_library_button = tk.Button(self.drawing_app_window, text="Zapisz do pamięci programu", command=self.add_to_library)
+        self.add_to_library_button.pack()
+
+    def toggle_mode(self):
+        # Przełączanie między rysowaniem a mazaniem
+        self.draw_mode = not self.draw_mode
+        if self.draw_mode:
+            self.mode_button.config(text="Rysuj")
+        else:
+            self.mode_button.config(text="Mazanie")
+
+    def paint_hex(self, event):
+        # Przetwarzanie współrzędnych kliknięcia na indeksy hexa
+        hex_width = 3 / 2 * self.hex_size
+        hex_height = math.sqrt(3) * self.hex_size
+        col = int(event.x / hex_width)
+        row = int(event.y / hex_height)
+        if col % 2 == 1:
+            row -= 1
+
+        # Sprawdzenie czy współrzędne są w zakresie 16x32
+        if 0 <= col < 32 and 0 <= row < 16:
+            # Obliczanie współrzędnych sześciokąta
+            x = col * hex_width
+            y = row * (hex_height)
+            if col % 2 == 1:
+                y += hex_height / 2
+
+            # Rysowanie lub mazanie sześciokąta, w zależności od aktualnego stanu
+            if self.draw_mode:
+                color = "black"
+            else:
+                color = self.canvas.cget('bg')
+            hexagon_coords = [
+                x, y,
+                x + self.hex_size, y,
+                x + hex_width, y + hex_height / 2,
+                x + self.hex_size, y + hex_height,
+                x, y + hex_height,
+                x - hex_width / 2, y + hex_height / 2
+            ]
+            self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
+
+    def clear_canvas(self):
+        # Usunięcie wszystkich elementów związanych z sześciokątami z canvasa
+        self.canvas.delete("all")
+    def add_to_library(self):
+        # Dodanie obrazka do biblioteki
+        name = simpledialog.askstring("Input", "Enter image name:")
+        if name:
+            self.drawings_library.append((name, self.segments.copy()))  # Zapisanie nazwy i kopii rysunku
+            print("Image added to library with name:", name)
+
+            # Zapisanie kodu funkcji do pliku "Uzytkownik.py"
+            filename = "Uzytkownik.py"
+            with open(filename, "a") as file:
+                file.write(f"\ndef {name}(self):\n")
+                file.write("    pattern = [\n")
+                for row in self.segments:
+                    file.write("        " + str(row) + ",\n")
+                file.write("    ]\n\n")
+                file.write("    self.segments = pattern\n")
+                file.write("    self.show_display(self.hex_size)\n")
+            print(f"Code appended to {filename}")
 
 if __name__ == "__main__":
     display_window = DisplayWindow(modul_name="Wszystkie moduły")
-    # display_window.zmien_modul(12,1)
     display_window.mainloop()
