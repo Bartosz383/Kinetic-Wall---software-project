@@ -13,6 +13,7 @@ def wall_function(display_window, x, y):
     """
     list_of_functions = [
         display_window.zmien_modul
+        # display_window.binary_pattern
     ]
 
     random_function = random.choice(list_of_functions)
@@ -91,6 +92,8 @@ def main_detect():
     detect_faces(video, wyswietlacz, prev_time)
 
     wyswietlacz.mainloop()
+
+
 
 if __name__ == "__main__":
     main_detect()
