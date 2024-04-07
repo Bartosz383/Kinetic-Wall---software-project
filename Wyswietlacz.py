@@ -1,6 +1,7 @@
 import tkinter as tk
 import math
 from tkinter import filedialog, simpledialog
+import Uzytkownik
 from PIL import ImageColor
 import random
 # import test
