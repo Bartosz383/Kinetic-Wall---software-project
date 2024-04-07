@@ -32,7 +32,7 @@ while True:
     normalized = resized / 255.0
 
     # Dla każdego piksela zmień jego kolor na czarny lub biały zgodnie z warunkiem
-    binary = np.where(normalized >= 0.5, 0, 255).astype(np.uint8)
+    binary = np.where(normalized >= 0.5, 255, 0).astype(np.uint8)
 
     # Przeskalowana macierz binary
     s_binary = cv2.resize(binary, (320, 160))
