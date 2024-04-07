@@ -21,7 +21,7 @@ class DisplayWindow(tk.Tk):
         self.hex_size = 15  # Rozmiar sześciokąta
         self.drawings_library = []  # lista przechowująca rysunki
 
-        self.create_pattern()
+        self.set_all_segments_to_zero()
 
         buttons_frame = tk.Frame(self)
         buttons_frame.grid(row=0, column=1, rowspan=5, padx=5)
@@ -121,15 +121,47 @@ class DisplayWindow(tk.Tk):
                 ]
 
                 # Kolor wypełnienia
-                color = "black" if self.segments[i][j] == 1 else "white"
+                grayscale_value = self.segments[i][j]  # Wartość segmentu z zakresu od 0 do 255
+                grayscale_hex = "#{:02x}{:02x}{:02x}".format(255 - grayscale_value, 255 - grayscale_value,
+                                                             255 - grayscale_value)  # Odwrotność wartości
+                color = grayscale_hex  # Ustawienie koloru wypełnienia na wartość odpowiadającą odwrotności wartości segmentu
 
                 # Narysowanie sześciokąta z odpowiednim wypełnieniem
                 self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
 
+    # def show_display(self, hex_size):
+    #     # Usunięcie istniejących sześciokątów na canvasie
+    #     self.canvas.delete("all")
+    #
+    #     # Wyświetlenie aktualnego stanu segmentów za pomocą wypełnionych sześciokątów
+    #     for i in range(16):
+    #         for j in range(32):
+    #             x = j * 3 / 2 * self.hex_size
+    #             y = i * math.sqrt(3) * self.hex_size
+    #
+    #             # Obrót co drugiego rzędu
+    #             if j % 2 == 1:
+    #                 y += math.sqrt(3) / 2 * self.hex_size
+    #
+    #             # Współrzędne wierzchołków sześciokąta
+    #             hexagon_coords = [
+    #                 x, y,
+    #                 x + self.hex_size, y,
+    #                 x + 3 / 2 * self.hex_size, y + math.sqrt(3) / 2 * self.hex_size,
+    #                 x + self.hex_size, y + math.sqrt(3) * self.hex_size,
+    #                 x, y + math.sqrt(3) * self.hex_size,
+    #                 x - 1 / 2 * self.hex_size, y + math.sqrt(3) / 2 * self.hex_size
+    #             ]
+    #
+    #             # Kolor wypełnienia
+    #             color = "black" if self.segments[i][j] == 1 else "white"
+    #
+    #             # Narysowanie sześciokąta z odpowiednim wypełnieniem
+    #             self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
+
     def create_pattern(self):
-        # Tworzenie losowego wzoru z wartościami 0 lub 1
-        pattern = [[random.choice([0, 1]) for _ in range(32)] for _ in range(16)]
-        print(pattern)
+        # Tworzenie losowego wzoru z wartościami od 0 do 255
+        pattern = [[random.randint(0, 255) for _ in range(32)] for _ in range(16)]
 
         self.segments = pattern
         self.show_display(self.hex_size)
@@ -148,24 +180,9 @@ class DisplayWindow(tk.Tk):
         # Ustawienie segmentów według określonego wzoru (np. jakieś konkretne wartości)
         # Poniżej znajduje się przykładowy wzór - można dostosować go do własnych potrzeb
         pattern = [
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1]
+            [(i % 256) for i in range(32)] for _ in range(16)
         ]
-
+        print(pattern)
         self.segments = pattern
         self.show_display(self.hex_size)
 
