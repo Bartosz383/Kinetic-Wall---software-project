@@ -159,3 +159,4 @@ def rysu(self):
 
     self.segments = pattern
     self.show_display(self.hex_size)
+
