@@ -1,6 +1,8 @@
 import tkinter as tk
 import math
 from tkinter import filedialog, simpledialog
+from PIL import ImageColor
+import random
 # import test
 class DisplayWindow(tk.Tk):
     def __init__(self, modul_name):
@@ -27,6 +29,7 @@ class DisplayWindow(tk.Tk):
         self.create_button(buttons_frame, "Rysuj", self.open_drawing_app)
         self.create_button(buttons_frame, "Ustaw wszystko na 0", self.set_all_segments_to_zero)
         self.create_button(buttons_frame, "Ustaw wszystko na 1", self.set_all_segments_to_one)
+        self.create_button(buttons_frame, "Losowy wzór", self.create_pattern)
         self.create_button(buttons_frame, "Ustaw według wzoru", self.set_segments_to_pattern)
         # self.create_button(buttons_frame, "Animuj falę", self.animate_wave)
         # self.create_button(buttons_frame, "Animuj podwójną falę", self.animate_double_wave)
@@ -59,6 +62,40 @@ class DisplayWindow(tk.Tk):
     #
     #             self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
 
+    # def show_display(self, hex_size):
+    #     # Usunięcie istniejących sześciokątów na canvasie
+    #     self.canvas.delete("all")
+    #
+    #     # Wyświetlenie aktualnego stanu segmentów za pomocą wypełnionych sześciokątów
+    #     for i in range(16):
+    #         for j in range(32):
+    #             x = j * 3 / 2 * self.hex_size
+    #             y = i * math.sqrt(3) * self.hex_size
+    #
+    #             # Obrót co drugiego rzędu
+    #             if j % 2 == 1:
+    #                 y += math.sqrt(3) / 2 * self.hex_size
+    #
+    #             # Współrzędne wierzchołków sześciokąta
+    #             hexagon_coords = [
+    #                 x, y,
+    #                 x + self.hex_size, y,
+    #                 x + 3 / 2 * self.hex_size, y + math.sqrt(3) / 2 * self.hex_size,
+    #                 x + self.hex_size, y + math.sqrt(3) * self.hex_size,
+    #                 x, y + math.sqrt(3) * self.hex_size,
+    #                 x - 1 / 2 * self.hex_size, y + math.sqrt(3) / 2 * self.hex_size
+    #             ]
+    #
+    #             # Obliczenie poziomu szarości
+    #             gray_level = self.segments[i][j]  # Przyjmuję, że self.segments zawiera wartości od 0 do 1
+    #
+    #             # Przekształcenie poziomu szarości na wartość RGB
+    #             color = ImageColor.getrgb(
+    #                 f'rgb({int(255 * gray_level)}, {int(255 * gray_level)}, {int(255 * gray_level)})')
+    #
+    #             # Narysowanie sześciokąta z odpowiednim wypełnieniem
+    #             self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
+
     def show_display(self, hex_size):
         # Usunięcie istniejących sześciokątów na canvasie
         self.canvas.delete("all")
@@ -90,29 +127,12 @@ class DisplayWindow(tk.Tk):
                 self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
 
     def create_pattern(self):
-        # Twój własny wzór, na przykład:
-        pattern = [
-            [0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-        ]
+        # Tworzenie losowego wzoru z wartościami 0 lub 1
+        pattern = [[random.choice([0, 1]) for _ in range(32)] for _ in range(16)]
+        print(pattern)
 
         self.segments = pattern
         self.show_display(self.hex_size)
-
 
     def set_all_segments_to_zero(self):
         # Ustawienie wszystkich segmentów na 0
