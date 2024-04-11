@@ -43,6 +43,7 @@ class DisplayWindow(tk.Tk):
         self.create_button(buttons_frame, "Animuj kilka razy", self.animate_loop)
         # self.create_button(buttons_frame, "Zmien modul", self.zmien_modul)
 
+
         self.show_display(self.hex_size)
 
     def create_button(self, frame, text, command):
@@ -350,6 +351,8 @@ class DisplayWindow(tk.Tk):
         self.add_to_library_button = tk.Button(self.drawing_app_window, text="Zapisz do pamięci programu", command=self.add_to_library)
         self.add_to_library_button.pack()
 
+        self.show_display(self.hex_size)
+
     def toggle_mode(self):
         # Przełączanie między rysowaniem a mazaniem
         self.draw_mode = not self.draw_mode
@@ -393,6 +396,7 @@ class DisplayWindow(tk.Tk):
     def clear_canvas(self):
         # Usunięcie wszystkich elementów związanych z sześciokątami z canvasa
         self.canvas.delete("all")
+        self.show_display(self.hex_size)
     def add_to_library(self):
         # Dodanie obrazka do biblioteki
         name = simpledialog.askstring("Input", "Enter image name:")
