@@ -4,7 +4,7 @@ from tkinter import filedialog, simpledialog
 import Uzytkownik
 from PIL import ImageColor
 import random
-# import test
+
 class DisplayWindow(tk.Tk):
     def __init__(self, modul_name):
         super().__init__()
@@ -27,6 +27,7 @@ class DisplayWindow(tk.Tk):
         buttons_frame = tk.Frame(self)
         buttons_frame.grid(row=0, column=1, rowspan=5, padx=5)
 
+        self.create_button(buttons_frame, "Obraz z kamery na żywo", self.veb_cam_display)
         self.create_button(buttons_frame, "Rysuj", self.open_drawing_app)
         self.create_button(buttons_frame, "Ustaw wszystko na 0", self.set_all_segments_to_white)
         self.create_button(buttons_frame, "Ustaw wszystko na 1", self.set_all_segments_to_black)
@@ -43,60 +44,16 @@ class DisplayWindow(tk.Tk):
         self.create_button(buttons_frame, "Animuj kilka razy", self.animate_loop)
         # self.create_button(buttons_frame, "Zmien modul", self.zmien_modul)
 
-
         self.show_display(self.hex_size)
+
+    def veb_cam_display(self):
+        from Obraz_Na_Zwyo import YourClassName
+        your_object = YourClassName()
+        your_object.show_display()
 
     def create_button(self, frame, text, command):
         button = tk.Button(frame, text=text, command=command)
         button.pack(side="top")
-
-    # def show_display(self):
-    #     # Usunięcie istniejących prostokątów na canvasie
-    #     self.canvas.delete("all")
-    #
-    #     # Wyświetlenie aktualnego stanu segmentów za pomocą wypełnionych prostokątów
-    #     for i in range(16):
-    #         for j in range(32):
-    #             x1, y1 = j * 25, i * 25  # Zmienione rozmiary kafelków
-    #             x2, y2 = x1 + 25, y1 + 25
-    #
-    #             color = "black" if self.segments[i][j] == 1 else "white"
-    #
-    #             self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
-
-    # def show_display(self, hex_size):
-    #     # Usunięcie istniejących sześciokątów na canvasie
-    #     self.canvas.delete("all")
-    #
-    #     # Wyświetlenie aktualnego stanu segmentów za pomocą wypełnionych sześciokątów
-    #     for i in range(16):
-    #         for j in range(32):
-    #             x = j * 3 / 2 * self.hex_size
-    #             y = i * math.sqrt(3) * self.hex_size
-    #
-    #             # Obrót co drugiego rzędu
-    #             if j % 2 == 1:
-    #                 y += math.sqrt(3) / 2 * self.hex_size
-    #
-    #             # Współrzędne wierzchołków sześciokąta
-    #             hexagon_coords = [
-    #                 x, y,
-    #                 x + self.hex_size, y,
-    #                 x + 3 / 2 * self.hex_size, y + math.sqrt(3) / 2 * self.hex_size,
-    #                 x + self.hex_size, y + math.sqrt(3) * self.hex_size,
-    #                 x, y + math.sqrt(3) * self.hex_size,
-    #                 x - 1 / 2 * self.hex_size, y + math.sqrt(3) / 2 * self.hex_size
-    #             ]
-    #
-    #             # Obliczenie poziomu szarości
-    #             gray_level = self.segments[i][j]  # Przyjmuję, że self.segments zawiera wartości od 0 do 1
-    #
-    #             # Przekształcenie poziomu szarości na wartość RGB
-    #             color = ImageColor.getrgb(
-    #                 f'rgb({int(255 * gray_level)}, {int(255 * gray_level)}, {int(255 * gray_level)})')
-    #
-    #             # Narysowanie sześciokąta z odpowiednim wypełnieniem
-    #             self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
 
     def show_display(self, hex_size):
         # Usunięcie istniejących sześciokątów na canvasie
@@ -130,36 +87,6 @@ class DisplayWindow(tk.Tk):
 
                 # Narysowanie sześciokąta z odpowiednim wypełnieniem
                 self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
-
-    # def show_display(self, hex_size):
-    #     # Usunięcie istniejących sześciokątów na canvasie
-    #     self.canvas.delete("all")
-    #
-    #     # Wyświetlenie aktualnego stanu segmentów za pomocą wypełnionych sześciokątów
-    #     for i in range(16):
-    #         for j in range(32):
-    #             x = j * 3 / 2 * self.hex_size
-    #             y = i * math.sqrt(3) * self.hex_size
-    #
-    #             # Obrót co drugiego rzędu
-    #             if j % 2 == 1:
-    #                 y += math.sqrt(3) / 2 * self.hex_size
-    #
-    #             # Współrzędne wierzchołków sześciokąta
-    #             hexagon_coords = [
-    #                 x, y,
-    #                 x + self.hex_size, y,
-    #                 x + 3 / 2 * self.hex_size, y + math.sqrt(3) / 2 * self.hex_size,
-    #                 x + self.hex_size, y + math.sqrt(3) * self.hex_size,
-    #                 x, y + math.sqrt(3) * self.hex_size,
-    #                 x - 1 / 2 * self.hex_size, y + math.sqrt(3) / 2 * self.hex_size
-    #             ]
-    #
-    #             # Kolor wypełnienia
-    #             color = "black" if self.segments[i][j] == 1 else "white"
-    #
-    #             # Narysowanie sześciokąta z odpowiednim wypełnieniem
-    #             self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
 
     def create_pattern(self):
         # Tworzenie losowego wzoru z wartościami od 0 do 255

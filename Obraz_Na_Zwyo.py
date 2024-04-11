@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from Wyswietlacz import DisplayWindow
 
 class YourClassName:
     def __init__(self):
@@ -12,7 +13,6 @@ class YourClassName:
 
     def show_display(self, size):
         if self.segments is not None:
-            # Tutaj możesz dodać kod wyświetlający macierz binarną
             print(self.segments)
 
 
@@ -43,8 +43,8 @@ while True:
 
     # Wyświetl przekształcony obraz
     cv2.imshow('Processed Image', binary)
-    cv2.imshow('Scaled Processed Image', s_binary)
-    cv2.imshow('Original Image', frame)
+    # cv2.imshow('Scaled Processed Image', s_binary)
+    # cv2.imshow('Original Image', frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
