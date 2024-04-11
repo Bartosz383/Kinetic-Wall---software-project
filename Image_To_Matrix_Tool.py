@@ -25,7 +25,7 @@ def resize_and_convert_to_gray(input_paths, output_folder):
         cv2.imwrite(output_folder + "/{}_32x16.jpg".format(filename), gray_image_32x16)
         cv2.imwrite(output_folder + "/{}_320x160.jpg".format(filename), gray_image_320x160)
     print("Konwersja zakończona pomyślnie.")
-    root.destroy()
+
 
 
 def select_input_files():
