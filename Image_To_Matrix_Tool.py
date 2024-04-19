@@ -4,7 +4,6 @@ import numpy as np
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-
 def zapisz_do_pliku(dane, nazwa_pliku):
     with open(nazwa_pliku, 'w') as plik:
         for wiersz in dane:
