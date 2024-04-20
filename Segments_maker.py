@@ -1,3 +1,6 @@
+import serial
+import time
+
 pattern = [
             [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248],
             [45, 12, 182, 77, 99, 94, 135, 158, 223, 42, 162, 158, 67, 238, 32, 150, 143, 2, 149, 169, 150, 149, 59, 119, 77, 154, 144, 228, 71, 111, 236, 55],
@@ -17,339 +20,60 @@ pattern = [
             [108, 100, 137, 59, 4, 201, 71, 78, 107, 2, 117, 71, 26, 224, 10, 23, 45, 194, 70, 34, 187, 46, 176, 11, 44, 75, 73, 108, 62, 70, 253, 174]
         ]
 
-
-def create_segment_matrix(matrix_name, start_i, end_i, start_j, end_j, segment_name):
-    segment = []
-
-    for i in range(start_i, end_i):
-        row = []
-        for j in range(start_j, end_j):
-            row.append(matrix_name[i][j])
-        segment.append(row)
-
-    # Wyświetlenie nowej macierzy segmentu
-    print(f"Segment matrix {segment_name}:")
-    for row in segment:
-        print(row)
-
-    return segment
-
 def create_segment_vector(matrix_name, start_i, end_i, start_j, end_j, segment_name):
     segment = []
-
     for i in range(start_i, end_i):
         for j in range(start_j, end_j):
             segment.append(matrix_name[i][j])
-
-    # Wyświetlenie nowego wektora segmentu
-    # print(f"Segment {segment_name}:")
-    # print(segment)
-
     return segment
 
-# segment_0 = create_segment_matrix(pattern, 0, 4, 0, 4, "segment_0")
-# segment_1 = create_segment_matrix(pattern, 0, 4, 4, 8, "segment_1")
-# segment_2 = create_segment_matrix(pattern, 0, 4, 8, 12, "segment_2")
-# segment_3 = create_segment_matrix(pattern, 0, 4, 12, 16, "segment_3")
-# segment_4 = create_segment_matrix(pattern, 0, 4, 16, 20, "segment_4")
-# segment_5 = create_segment_matrix(pattern, 0, 4, 20, 24, "segment_5")
-# segment_6 = create_segment_matrix(pattern, 0, 4, 24, 28, "segment_6")
-# segment_7 = create_segment_matrix(pattern, 0, 4, 28, 32, "segment_7")
-# segment_8 = create_segment_matrix(pattern, 4, 8, 0, 4, "segment_8")
-# segment_9 = create_segment_matrix(pattern, 4, 8, 4, 8, "segment_9")
-# segment_10 = create_segment_matrix(pattern, 4, 8, 8, 12, "segment_10")
-# segment_11 = create_segment_matrix(pattern, 4, 8, 12, 16, "segment_11")
-# segment_12 = create_segment_matrix(pattern, 4, 8, 16, 20, "segment_12")
-# segment_13 = create_segment_matrix(pattern, 4, 8, 20, 24, "segment_13")
-# segment_14 = create_segment_matrix(pattern, 4, 8, 24, 28, "segment_14")
-# segment_15 = create_segment_matrix(pattern, 4, 8, 28, 32, "segment_15")
-# segment_16 = create_segment_matrix(pattern, 8, 12, 0, 4, "segment_16")
-# segment_17 = create_segment_matrix(pattern, 8, 12, 4, 8, "segment_17")
-# segment_18 = create_segment_matrix(pattern, 8, 12, 8, 12, "segment_18")
-# segment_19 = create_segment_matrix(pattern, 8, 12, 12, 16, "segment_19")
-# segment_20 = create_segment_matrix(pattern, 8, 12, 16, 20, "segment_20")
-# segment_21 = create_segment_matrix(pattern, 8, 12, 20, 24, "segment_21")
-# segment_22 = create_segment_matrix(pattern, 8, 12, 24, 28, "segment_22")
-# segment_23 = create_segment_matrix(pattern, 8, 12, 28, 32, "segment_23")
-# segment_24 = create_segment_matrix(pattern, 12, 16, 0, 4, "segment_24")
-# segment_25 = create_segment_matrix(pattern, 12, 16, 4, 8, "segment_25")
-# segment_26 = create_segment_matrix(pattern, 12, 16, 8, 12, "segment_26")
-# segment_27 = create_segment_matrix(pattern, 12, 16, 12, 16, "segment_27")
-# segment_28 = create_segment_matrix(pattern, 12, 16, 16, 20, "segment_28")
-# segment_29 = create_segment_matrix(pattern, 12, 16, 20, 24, "segment_29")
-# segment_30 = create_segment_matrix(pattern, 12, 16, 24, 28, "segment_30")
-# segment_31 = create_segment_matrix(pattern, 12, 16, 28, 32, "segment_31")
-
-v_segment_0 = create_segment_vector(pattern, 0, 4, 0, 4, 0)
-v_segment_1 = create_segment_vector(pattern, 0, 4, 4, 8, 1)
-v_segment_2 = create_segment_vector(pattern, 0, 4, 8, 12, 2)
-v_segment_3 = create_segment_vector(pattern, 0, 4, 12, 16, 3)
-v_segment_4 = create_segment_vector(pattern, 0, 4, 16, 20, 4)
-v_segment_5 = create_segment_vector(pattern, 0, 4, 20, 24, 5)
-v_segment_6 = create_segment_vector(pattern, 0, 4, 24, 28, 6)
-v_segment_7 = create_segment_vector(pattern, 0, 4, 28, 32, 7)
-v_segment_8 = create_segment_vector(pattern, 4, 8, 0, 4, 8)
-v_segment_9 = create_segment_vector(pattern, 4, 8, 4, 8, 9)
-v_segment_10 = create_segment_vector(pattern, 4, 8, 8, 12, 10)
-v_segment_11 = create_segment_vector(pattern, 4, 8, 12, 16, 11)
-v_segment_12 = create_segment_vector(pattern, 4, 8, 16, 20, 12)
-v_segment_13 = create_segment_vector(pattern, 4, 8, 20, 24, 13)
-v_segment_14 = create_segment_vector(pattern, 4, 8, 24, 28, 14)
-v_segment_15 = create_segment_vector(pattern, 4, 8, 28, 32, 15)
-v_segment_16 = create_segment_vector(pattern, 8, 12, 0, 4, 16)
-v_segment_17 = create_segment_vector(pattern, 8, 12, 4, 8, 17)
-v_segment_18 = create_segment_vector(pattern, 8, 12, 8, 12, 18)
-v_segment_19 = create_segment_vector(pattern, 8, 12, 12, 16, 9)
-v_segment_20 = create_segment_vector(pattern, 8, 12, 16, 20, 20)
-v_segment_21 = create_segment_vector(pattern, 8, 12, 20, 24, 21)
-v_segment_22 = create_segment_vector(pattern, 8, 12, 24, 28, 22)
-v_segment_23 = create_segment_vector(pattern, 8, 12, 28, 32, 23)
-v_segment_24 = create_segment_vector(pattern, 12, 16, 0, 4, 24)
-v_segment_25 = create_segment_vector(pattern, 12, 16, 4, 8, 25)
-v_segment_26 = create_segment_vector(pattern, 12, 16, 8, 12, 26)
-v_segment_27 = create_segment_vector(pattern, 12, 16, 12, 16, 27)
-v_segment_28 = create_segment_vector(pattern, 12, 16, 16, 20, 28)
-v_segment_29 = create_segment_vector(pattern, 12, 16, 20, 24, 29)
-v_segment_30 = create_segment_vector(pattern, 12, 16, 24, 28, 30)
-v_segment_31 = create_segment_vector(pattern, 12, 16, 28, 32, 31)
-
-# segments_vectors = [
-#     create_segment_vector(pattern, 0, 4, j*4, (j+1)*4, f"segment_{i*8+j}") for i in range(4) for j in range(8)
-# ]
-#
-# segments_vectors.append(create_segment_vector(pattern, 12, 16, 28, 32, "segment_31"))
-
-# print(hex(v_segment_0[13]))
-
-
-        # 0x55,  # Start
-        # bit2,  # segment address
-        # bit3,  # motor address
-        # bit4,  # requested motor angle
-        # bit5,  # motor speed
-        # calculate_xor_checksum(bit2, bit3, bit4, bit5),  # XOR checksum
-        # 0xAA  # Stop
-# zrób ramkę z tego
-
+# Create segment vectors
+segment_vectors = [
+    create_segment_vector(pattern, i*4, (i+1)*4, j*4, (j+1)*4, f"segment_{i*8+j}")
+    for i in range(4)
+    for j in range(8)
+]
 
 motor_angle = 45
 motor_speed = 150
 
 def calculate_xor_checksum(bit2, bit3, bit4, bit5):
-    bit6 = bit2 ^ bit3 ^ bit4 ^ bit5
-    return bit6
+    return bit2 ^ bit3 ^ bit4 ^ bit5
 
-def prepare_frame(bit2, bit3, bit4, bit5, bit6):
-    # Sprawdzenie czy wartości mieszczą się w odpowiednich zakresach
-    if not (0 <= bit2 <= 15):
-        raise ValueError("bit2 must be in range 0-15")
-    if not (0 <= bit3 <= 32):
-        raise ValueError("bit3 must be in range 0-32")
-    if not (-45 <= bit4 <= 45):
-        raise ValueError("bit4 must be in range -45 to 45")
-    if not (0 <= bit5 <= 255):
-        raise ValueError("bit5 must be in range 0-255")
-
-    # Przygotowanie ramki danych
+def prepare_frame(bit2, bit3, bit4, bit5):
+    checksum = calculate_xor_checksum(bit2, bit3, bit4, bit5)
     frame = bytearray([
         0x55,  # Start
         bit2,  # segment address
         bit3,  # motor address
         bit4,  # requested motor angle
         bit5,  # motor speed
-        calculate_xor_checksum(bit2, bit3, bit4, bit5),  # XOR checksum
+        checksum,  # XOR checksum
         0xAA  # Stop
     ])
     return frame
 
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 0
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_0[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
+def send_frames(segment_vectors, motor_angle, motor_speed):
+    # Serial port configuration
+    port = 'COM3'  # Change this to your serial port
+    baudrate = 9600  # Change this to your baudrate
 
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 1
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_1[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
+    # Initialize serial connection
+    ser = serial.Serial(port, baudrate)
+    time.sleep(2)  # Wait for the serial connection to initialize
 
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 2
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_2[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
+    for i, segment in enumerate(segment_vectors):
+        for value in segment:
+            try:
+                frame = prepare_frame(i, value, motor_angle, motor_speed)
+                ser.write(frame)
+                print(f"Sent frame for segment {i}, value {value}: {frame.hex().upper()}")
+                time.sleep(0.5)  # Delay between sending frames
+            except ValueError as e:
+                print(f"Error preparing frame for segment {i}, value {value}: {e}")
 
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 3
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_3[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
+    # Close serial connection
+    ser.close()
 
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 4
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_4[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 5
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_5[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 6
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_6[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 7
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_7[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 8
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_8[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 9
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_9[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 10
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_10[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 11
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_11[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 12
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_12[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 13
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_13[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 14
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_14[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
-
-for value in range(16):  # od 0 do 16
-    try:
-        bit2 = 15
-        bit3 = value
-        bit4 = motor_angle
-        bit5 = motor_speed
-        bit6 = calculate_xor_checksum
-        frame = prepare_frame(bit2, bit3, bit4, bit5, bit6)
-        print(f"Prepared frame for v_segment_15[0] = {value}:", frame.hex().upper())
-    except ValueError as e:
-        print("Error:", e)
+# Send frames
+send_frames(segment_vectors, motor_angle, motor_speed)
