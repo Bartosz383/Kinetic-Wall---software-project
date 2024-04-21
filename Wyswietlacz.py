@@ -31,7 +31,7 @@ class DisplayWindow(tk.Tk):
         self.create_button(buttons_frame, "Rysuj", self.open_drawing_app)
         self.create_button(buttons_frame, "Ustaw wszystko na 0", self.set_all_segments_to_white)
         self.create_button(buttons_frame, "Ustaw wszystko na 1", self.set_all_segments_to_black)
-        self.create_button(buttons_frame, "Losowy wzór", self.create_pattern)
+        self.create_button(buttons_frame, "Losowy wzór", self.create_random_pattern)
         self.create_button(buttons_frame, "Ustaw według wzoru", self.set_segments_to_pattern)
         # self.create_button(buttons_frame, "Animuj falę", self.animate_wave)
         # self.create_button(buttons_frame, "Animuj podwójną falę", self.animate_double_wave)
@@ -88,12 +88,13 @@ class DisplayWindow(tk.Tk):
                 # Narysowanie sześciokąta z odpowiednim wypełnieniem
                 self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
 
-    def create_pattern(self):
+    def create_random_pattern(self):
         # Tworzenie losowego wzoru z wartościami od 0 do 255
         pattern = [[random.randint(0, 255) for _ in range(32)] for _ in range(16)]
 
         self.segments = pattern
         self.show_display(self.hex_size)
+
 
     def set_all_segments_to_white(self):
         # Ustawienie wszystkich segmentów na 0

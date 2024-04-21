@@ -1,6 +1,7 @@
 import serial
 import time
 
+
 pattern = [
             [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248],
             [45, 12, 182, 77, 99, 94, 135, 158, 223, 42, 162, 158, 67, 238, 32, 150, 143, 2, 149, 169, 150, 149, 59, 119, 77, 154, 144, 228, 71, 111, 236, 55],
@@ -17,14 +18,13 @@ pattern = [
             [41, 185, 61, 223, 151, 151, 3, 247, 165, 156, 24, 17, 120, 120, 10, 5, 117, 67, 11, 214, 123, 42, 250, 161, 83, 212, 9, 84, 191, 89, 239, 34],
             [45, 200, 36, 251, 142, 79, 237, 233, 54, 46, 77, 138, 59, 208, 247, 222, 105, 218, 24, 34, 226, 113, 178, 208, 107, 179, 129, 32, 169, 126, 20, 130],
             [192, 207, 164, 226, 68, 163, 234, 238, 63, 62, 190, 127, 22, 11, 60, 17, 172, 253, 184, 141, 20, 217, 116, 10, 191, 37, 17, 204, 170, 133, 209, 160],
-            [108, 100, 137, 59, 4, 201, 71, 78, 107, 2, 117, 71, 26, 224, 10, 23, 45, 194, 70, 34, 187, 46, 176, 11, 44, 75, 73, 108, 62, 70, 253, 174]
-        ]
+            [108, 100, 137, 59, 4, 201, 71, 78, 107, 2, 117, 71, 26, 224, 10, 23, 45, 194, 70, 34, 187, 46, 176, 11, 44, 75, 73, 108, 62, 70, 253, 174]]
 
-def create_segment_vector(matrix_name, start_i, end_i, start_j, end_j, segment_name):
+def create_segment_vector(pattern, start_i, end_i, start_j, end_j, segment_name):
     segment = []
     for i in range(start_i, end_i):
         for j in range(start_j, end_j):
-            segment.append(matrix_name[i][j])
+            segment.append(pattern[i][j])
     return segment
 
 # Create segment vectors
@@ -55,7 +55,7 @@ def prepare_frame(bit2, bit3, bit4, bit5):
 
 def send_frames(segment_vectors, motor_angle, motor_speed):
     # Serial port configuration
-    port = 'COM3'  # Change this to your serial port
+    port = 'COM4'  # Change this to your serial port
     baudrate = 9600  # Change this to your baudrate
 
     # Initialize serial connection
@@ -68,7 +68,7 @@ def send_frames(segment_vectors, motor_angle, motor_speed):
                 frame = prepare_frame(i, value, motor_angle, motor_speed)
                 ser.write(frame)
                 print(f"Sent frame for segment {i}, value {value}: {frame.hex().upper()}")
-                time.sleep(0.5)  # Delay between sending frames
+                time.sleep(0.001)  # Delay between sending frames
             except ValueError as e:
                 print(f"Error preparing frame for segment {i}, value {value}: {e}")
 
