@@ -34,6 +34,7 @@ segment_vectors = [
     for j in range(8)
 ]
 
+
 motor_angle = 45
 motor_speed = 150
 
