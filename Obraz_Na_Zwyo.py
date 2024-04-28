@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 import serial
 import time
 import threading
+from queue import Queue
 
 class YourClassName:
     def __init__(self):
@@ -42,6 +43,7 @@ def update_camera():
             video_label.imgtk = img
             video_label.config(image=img)
             video_label.update()
+        time.sleep(0.03)  # Opóźnienie 30 ms (około 33 klatki na sekundę)
 
 # Funkcja do aktualizacji etykiety z segmentami
 def update_label():
@@ -60,17 +62,20 @@ def update_label():
             for segment_name, segment in your_object.segments:
                 segment_str = ", ".join(map(str, segment))
                 segments_text += f"{segment_name}: {segment_str}\n"
-                # Wysyłanie segmentów do portu COM3
-                send_to_serial(segment_str)
+                # Dodawanie danych do kolejki dla portu COM3
+                com_queue.put(segment_str)
 
         segment_label.config(text=segments_text)
         segment_label.update()
+        time.sleep(0.03)  # Opóźnienie 30 ms (około 33 klatki na sekundę)
 
 # Funkcja do wysyłania danych do portu szeregowego COM3
-def send_to_serial(data):
-    with serial.Serial('COM3', 9600, timeout=1) as ser:
-        ser.write(data.encode())
-        time.sleep(0.1)  # Poczekaj chwilę na wysłanie danych
+def send_to_serial():
+    while True:
+        data = com_queue.get()
+        with serial.Serial('COM3', 9600, timeout=1) as ser:
+            ser.write(data.encode())
+            time.sleep(0.1)  # Poczekaj chwilę na wysłanie danych
 
 # Rejestruj obraz z kamery i wyświetlaj go na żywo
 cap = cv2.VideoCapture(0)
@@ -89,6 +94,9 @@ video_window.title("Camera Feed")
 video_label = tk.Label(video_window)
 video_label.pack()
 
+# Utwórz kolejkę dla portu COM3
+com_queue = Queue()
+
 # Rozpocznij aktualizację obrazu z kamery w osobnym wątku
 camera_thread = threading.Thread(target=update_camera)
 camera_thread.daemon = True
@@ -98,6 +106,11 @@ camera_thread.start()
 label_thread = threading.Thread(target=update_label)
 label_thread.daemon = True
 label_thread.start()
+
+# Rozpocznij wątek do wysyłania danych do portu COM3
+serial_thread = threading.Thread(target=send_to_serial)
+serial_thread.daemon = True
+serial_thread.start()
 
 # Pętla główna Tkintera
 root.mainloop()
