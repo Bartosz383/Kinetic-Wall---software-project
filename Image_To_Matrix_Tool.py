@@ -132,4 +132,4 @@ button_exit.grid(row=3, column=1, pady=10)
 
 root.mainloop()
 
-# pododawaj printy bym mógł sprawdzić czy działa
+

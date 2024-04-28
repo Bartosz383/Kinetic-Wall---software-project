@@ -93,7 +93,5 @@ def main_detect():
 
     wyswietlacz.mainloop()
 
-
-
 if __name__ == "__main__":
     main_detect()
