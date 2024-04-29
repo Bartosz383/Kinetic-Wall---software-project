@@ -5,7 +5,7 @@ from tkinter import filedialog, messagebox
 import serial
 import time
 
-def resize_and_convert_to_gray(input_paths, output_folder, motor_angle, motor_speed, selected_port):
+def resize_and_convert_to_gray(input_paths, output_folder, motor_speed, selected_port):
     for input_path in input_paths:
         try:
             original_image = cv2.imread(input_path)
@@ -28,15 +28,15 @@ def resize_and_convert_to_gray(input_paths, output_folder, motor_angle, motor_sp
                 for j in range(8)
             ]
 
-            motor_angle_value = int(motor_angle.get()) if motor_angle.get() else 45
-            motor_speed_value = int(motor_speed.get()) if motor_speed.get() else 150
+            motor_speed_value = max(0, min(int(motor_speed.get()) if motor_speed.get() else 150, 255))  # Ograniczenie prędkości do przedziału od 0 do 255
 
-            send_frames(segment_vectors, motor_angle_value, motor_speed_value, selected_port.get())
+            send_frames(segment_vectors, motor_speed_value, selected_port.get())
             save_segment_vectors(segment_vectors, output_folder, filename)
 
         except Exception as e:
             messagebox.showerror("Błąd", "Wystąpił błąd podczas przetwarzania pliku: {}\n{}".format(input_path, str(e)))
     messagebox.showinfo("Informacja", "Konwersja zakończona pomyślnie.")
+
 
 def calculate_xor_checksum(bit2, bit3, bit4, bit5):
     return bit2 ^ bit3 ^ bit4 ^ bit5
@@ -54,7 +54,7 @@ def prepare_frame(bit2, bit3, bit4, bit5):
     ])
     return frame
 
-def send_frames(segment_vectors, motor_angle, motor_speed, selected_port):
+def send_frames(segment_vectors, motor_speed, selected_port):
     # Serial port configuration
     port = selected_port  # Change this to the selected port
     baudrate = 9600  # Change this to your baudrate
@@ -66,7 +66,7 @@ def send_frames(segment_vectors, motor_angle, motor_speed, selected_port):
     for i, segment in enumerate(segment_vectors):
         for value in segment:
             try:
-                frame = prepare_frame(i, value, motor_angle, motor_speed)
+                frame = prepare_frame(i, value, 0, motor_speed)  # Ustawiamy wartość motor_angle na 0
                 ser.write(frame)
                 print(f"Sent frame for segment {i}, value {value}: {frame.hex().upper()}")
                 time.sleep(0.001)  # Delay between sending frames
@@ -123,14 +123,8 @@ entry_output.grid(row=1, column=1, padx=5, pady=5)
 button_browse_output = tk.Button(root, text="Wybierz folder", command=select_output_folder)
 button_browse_output.grid(row=1, column=2, padx=5, pady=5)
 
-label_motor_angle = tk.Label(root, text="Kąt silnika:")
-label_motor_angle.grid(row=2, column=0, padx=5, pady=5, sticky="w")
-
-motor_angle = tk.Entry(root, width=10)
-motor_angle.grid(row=2, column=1, padx=5, pady=5)
-
-label_motor_speed = tk.Label(root, text="Prędkość silnika:")
-label_motor_speed.grid(row=3, column=0, padx=5, pady=5, sticky="w")
+label_motor_speed_range = tk.Label(root, text="Prędkość silnika (od 0 do 255):")
+label_motor_speed_range.grid(row=3, column=0, padx=5, pady=5, sticky="w")
 
 motor_speed = tk.Entry(root, width=10)
 motor_speed.grid(row=3, column=1, padx=5, pady=5)
@@ -145,7 +139,7 @@ selected_port.set(ports[0])  # Set default selected port
 port_dropdown = tk.OptionMenu(root, selected_port, *ports)
 port_dropdown.grid(row=4, column=1, padx=5, pady=5)
 
-button_convert = tk.Button(root, text="Konwertuj", command=lambda: [resize_and_convert_to_gray(listbox_input.get(0, tk.END), entry_output.get(), motor_angle, motor_speed, selected_port), root.destroy()])
+button_convert = tk.Button(root, text="Konwertuj", command=lambda: resize_and_convert_to_gray(listbox_input.get(0, tk.END), entry_output.get(), motor_speed, selected_port))
 button_convert.grid(row=5, column=1, pady=10)
 
 button_exit = tk.Button(root, text="Wyjdź", command=root.destroy)
