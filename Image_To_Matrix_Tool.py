@@ -6,6 +6,10 @@ import serial
 import time
 
 def resize_and_convert_to_gray(input_paths, output_folder, motor_speed, selected_port):
+    if not input_paths:
+        messagebox.showerror("Błąd", "Nie wybrano żadnych plików wejściowych.")
+        return
+
     for input_path in input_paths:
         try:
             original_image = cv2.imread(input_path)
@@ -30,8 +34,9 @@ def resize_and_convert_to_gray(input_paths, output_folder, motor_speed, selected
 
             motor_speed_value = max(0, min(int(motor_speed.get()) if motor_speed.get() else 150, 255))  # Ograniczenie prędkości do przedziału od 0 do 255
 
+            save_frames(segment_vectors, motor_speed_value, output_folder, filename)
             send_frames(segment_vectors, motor_speed_value, selected_port.get())
-            save_segment_vectors(segment_vectors, output_folder, filename)
+            # save_segment_vectors(segment_vectors, output_folder, filename)
 
         except Exception as e:
             messagebox.showerror("Błąd", "Wystąpił błąd podczas przetwarzania pliku: {}\n{}".format(input_path, str(e)))
@@ -91,6 +96,15 @@ def save_segment_vectors(segment_vectors, output_folder, filename):
             linia = ",".join(map(str, segment_vector))
             plik.write(linia + '\n')
     print("Segmenty zostały zapisane w pliku:", sciezka_pliku)
+
+def save_frames(segment_vectors, motor_speed, output_folder, filename):
+    sciezka_pliku = output_folder + "/{}_32x16_frames.txt".format(filename)
+    with open(sciezka_pliku, 'w') as plik:
+        for i, segment in enumerate(segment_vectors):
+            for j, value in enumerate(segment):
+                frame = prepare_frame(i, j, value, motor_speed)
+                plik.write(f"{frame.hex().upper()}")
+    print("Ramki zostały zapisane w pliku:", sciezka_pliku)
 
 def select_input_files():
     input_paths = filedialog.askopenfilenames(title="Wybierz pliki wejściowe")
