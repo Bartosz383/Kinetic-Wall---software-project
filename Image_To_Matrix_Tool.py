@@ -5,7 +5,7 @@ from tkinter import filedialog, messagebox
 import serial
 import time
 
-def resize_and_convert_to_gray(input_paths, output_folder):
+def resize_and_convert_to_gray(input_paths, output_folder, motor_angle, motor_speed):
     for input_path in input_paths:
         try:
             original_image = cv2.imread(input_path)
@@ -28,12 +28,10 @@ def resize_and_convert_to_gray(input_paths, output_folder):
                 for j in range(8)
             ]
 
-            # for idx, segment_vector in enumerate(segment_vectors):
-            #     print(f"Segment {idx}: {segment_vector}")
+            motor_angle_value = int(motor_angle.get()) if motor_angle.get() else 45
+            motor_speed_value = int(motor_speed.get()) if motor_speed.get() else 150
 
-            motor_angle = 45
-            motor_speed = 150
-            send_frames(segment_vectors, motor_angle, motor_speed)
+            send_frames(segment_vectors, motor_angle_value, motor_speed_value)
             save_segment_vectors(segment_vectors, output_folder, filename)
 
         except Exception as e:
@@ -58,7 +56,7 @@ def prepare_frame(bit2, bit3, bit4, bit5):
 
 def send_frames(segment_vectors, motor_angle, motor_speed):
     # Serial port configuration
-    port = 'COM4'  # Change this to your serial port
+    port = 'COM3'  # Change this to your serial port
     baudrate = 9600  # Change this to your baudrate
 
     # Initialize serial connection
@@ -77,6 +75,7 @@ def send_frames(segment_vectors, motor_angle, motor_speed):
 
     # Close serial connection
     ser.close()
+
 def create_segment_vector(dane, start_i, end_i, start_j, end_j, segment_name):
     segment = []
     for i in range(start_i, end_i):
@@ -124,12 +123,22 @@ entry_output.grid(row=1, column=1, padx=5, pady=5)
 button_browse_output = tk.Button(root, text="Wybierz folder", command=select_output_folder)
 button_browse_output.grid(row=1, column=2, padx=5, pady=5)
 
-button_convert = tk.Button(root, text="Konwertuj", command=lambda: [resize_and_convert_to_gray(listbox_input.get(0, tk.END), entry_output.get()), root.destroy()])
-button_convert.grid(row=2, column=1, pady=10)
+label_motor_angle = tk.Label(root, text="Kąt silnika:")
+label_motor_angle.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+
+motor_angle = tk.Entry(root, width=10)
+motor_angle.grid(row=2, column=1, padx=5, pady=5)
+
+label_motor_speed = tk.Label(root, text="Prędkość silnika:")
+label_motor_speed.grid(row=3, column=0, padx=5, pady=5, sticky="w")
+
+motor_speed = tk.Entry(root, width=10)
+motor_speed.grid(row=3, column=1, padx=5, pady=5)
+
+button_convert = tk.Button(root, text="Konwertuj", command=lambda: [resize_and_convert_to_gray(listbox_input.get(0, tk.END), entry_output.get(), motor_angle, motor_speed), root.destroy()])
+button_convert.grid(row=4, column=1, pady=10)
 
 button_exit = tk.Button(root, text="Wyjdź", command=root.destroy)
-button_exit.grid(row=3, column=1, pady=10)
+button_exit.grid(row=5, column=1, pady=10)
 
 root.mainloop()
-
-
