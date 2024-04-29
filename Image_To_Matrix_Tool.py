@@ -47,7 +47,7 @@ def prepare_frame(bit2, bit3, bit4, bit5):
         0x55,  # Start
         bit2,  # segment address
         bit3,  # motor address
-        bit4,  # requested motor angle
+        bit4,  # requested motor angle; value (segment)
         bit5,  # motor speed
         checksum,  # XOR checksum
         0xAA  # Stop
@@ -66,7 +66,7 @@ def send_frames(segment_vectors, motor_speed, selected_port):
     for i, segment in enumerate(segment_vectors):
         for value in segment:
             try:
-                frame = prepare_frame(i, value, 0, motor_speed)  # Ustawiamy wartość motor_angle na 0
+                frame = prepare_frame(i, 0, value, motor_speed)  # Ustawiamy wartość motor_angle na 0
                 ser.write(frame)
                 print(f"Sent frame for segment {i}, value {value}: {frame.hex().upper()}")
                 time.sleep(0.001)  # Delay between sending frames
