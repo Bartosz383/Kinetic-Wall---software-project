@@ -77,6 +77,24 @@ def send_to_serial():
             ser.write(data.encode())
             time.sleep(0.1)  # Poczekaj chwilę na wysłanie danych
 
+# Funkcja do przygotowania ramki danych zaczynającej się od 0x55 i kończącej na 0xAA
+def prepare_frame(bit2, bit3, bit4, bit5):
+    checksum = calculate_xor_checksum(bit2, bit3, bit4, bit5)
+    frame = bytearray([
+        0x55,  # Start
+        bit2,  # segment address
+        bit3,  # motor address
+        bit4,  # requested motor angle
+        bit5,  # motor speed
+        checksum,  # XOR checksum
+        0xAA  # Stop
+    ])
+    return frame
+
+# Funkcja do obliczania XOR checksum
+def calculate_xor_checksum(bit2, bit3, bit4, bit5):
+    return bit2 ^ bit3 ^ bit4 ^ bit5
+
 # Rejestruj obraz z kamery i wyświetlaj go na żywo
 cap = cv2.VideoCapture(0)
 
