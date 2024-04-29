@@ -46,13 +46,14 @@ def prepare_frame(bit2, bit3, bit4, bit5):
     frame = bytearray([
         0x55,  # Start
         bit2,  # segment address
-        bit3,  # motor address
+        bit3,  # motor address (wartości od 0 do 15, iterowane w kółko)
         bit4,  # requested motor angle; value (segment)
         bit5,  # motor speed
         checksum,  # XOR checksum
         0xAA  # Stop
     ])
     return frame
+
 
 def send_frames(segment_vectors, motor_speed, selected_port):
     # Serial port configuration
@@ -64,14 +65,14 @@ def send_frames(segment_vectors, motor_speed, selected_port):
     time.sleep(2)  # Wait for the serial connection to initialize
 
     for i, segment in enumerate(segment_vectors):
-        for value in segment:
+        for j, value in enumerate(segment):
             try:
-                frame = prepare_frame(i, 0, value, motor_speed)  # Ustawiamy wartość motor_angle na 0
+                frame = prepare_frame(i, j, value, motor_speed)
                 ser.write(frame)
-                print(f"Sent frame for segment {i}, value {value}: {frame.hex().upper()}")
+                print(f"Sent frame for segment {i}, motor_id {j}, value {value}: {frame.hex().upper()}")
                 time.sleep(0.001)  # Delay between sending frames
             except ValueError as e:
-                print(f"Error preparing frame for segment {i}, value {value}: {e}")
+                print(f"Error preparing frame for segment {i}, motor_id {j}, value {value}: {e}")
 
     # Close serial connection
     ser.close()
