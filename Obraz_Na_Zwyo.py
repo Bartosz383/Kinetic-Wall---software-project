@@ -136,3 +136,4 @@ root.mainloop()
 # Zatrzymaj odczyt z kamery
 cap.release()
 cv2.destroyAllWindows()
+
