@@ -5,7 +5,7 @@ from tkinter import filedialog, messagebox
 import serial
 import time
 
-def resize_and_convert_to_gray(input_paths, output_folder, motor_angle, motor_speed):
+def resize_and_convert_to_gray(input_paths, output_folder, motor_angle, motor_speed, selected_port):
     for input_path in input_paths:
         try:
             original_image = cv2.imread(input_path)
@@ -31,7 +31,7 @@ def resize_and_convert_to_gray(input_paths, output_folder, motor_angle, motor_sp
             motor_angle_value = int(motor_angle.get()) if motor_angle.get() else 45
             motor_speed_value = int(motor_speed.get()) if motor_speed.get() else 150
 
-            send_frames(segment_vectors, motor_angle_value, motor_speed_value)
+            send_frames(segment_vectors, motor_angle_value, motor_speed_value, selected_port.get())
             save_segment_vectors(segment_vectors, output_folder, filename)
 
         except Exception as e:
@@ -54,9 +54,9 @@ def prepare_frame(bit2, bit3, bit4, bit5):
     ])
     return frame
 
-def send_frames(segment_vectors, motor_angle, motor_speed):
+def send_frames(segment_vectors, motor_angle, motor_speed, selected_port):
     # Serial port configuration
-    port = 'COM3'  # Change this to your serial port
+    port = selected_port  # Change this to the selected port
     baudrate = 9600  # Change this to your baudrate
 
     # Initialize serial connection
@@ -135,10 +135,20 @@ label_motor_speed.grid(row=3, column=0, padx=5, pady=5, sticky="w")
 motor_speed = tk.Entry(root, width=10)
 motor_speed.grid(row=3, column=1, padx=5, pady=5)
 
-button_convert = tk.Button(root, text="Konwertuj", command=lambda: [resize_and_convert_to_gray(listbox_input.get(0, tk.END), entry_output.get(), motor_angle, motor_speed), root.destroy()])
-button_convert.grid(row=4, column=1, pady=10)
+label_port = tk.Label(root, text="Port COM:")
+label_port.grid(row=4, column=0, padx=5, pady=5, sticky="w")
+
+ports = ["COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8"]  # Modify this list with available COM ports
+selected_port = tk.StringVar(root)
+selected_port.set(ports[0])  # Set default selected port
+
+port_dropdown = tk.OptionMenu(root, selected_port, *ports)
+port_dropdown.grid(row=4, column=1, padx=5, pady=5)
+
+button_convert = tk.Button(root, text="Konwertuj", command=lambda: [resize_and_convert_to_gray(listbox_input.get(0, tk.END), entry_output.get(), motor_angle, motor_speed, selected_port), root.destroy()])
+button_convert.grid(row=5, column=1, pady=10)
 
 button_exit = tk.Button(root, text="Wyjdź", command=root.destroy)
-button_exit.grid(row=5, column=1, pady=10)
+button_exit.grid(row=6, column=1, pady=10)
 
 root.mainloop()
