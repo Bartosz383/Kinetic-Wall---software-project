@@ -4,7 +4,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import serial
 import time
+import threading
 
+calibration_semaphore = threading.Semaphore(value=1)
 def resize_and_convert_to_gray(input_paths, output_folder, motor_speed, selected_port):
     if not input_paths:
         messagebox.showerror("Błąd", "Nie wybrano żadnych plików wejściowych.")
@@ -59,7 +61,8 @@ def prepare_frame(bit2, bit3, bit4, bit5):
     ])
     return frame
 
-
+def send_frames_in_thread(segment_vectors, motor_speed, selected_port):
+    send_frames(segment_vectors, motor_speed, selected_port)
 def send_frames(segment_vectors, motor_speed, selected_port):
     # Serial port configuration
     port = selected_port  # Change this to the selected port
@@ -83,6 +86,13 @@ def send_frames(segment_vectors, motor_speed, selected_port):
     # Close serial connection
     ser.close()
 
+def confirm_calibration():
+    result = messagebox.askyesno("Potwierdzenie", "Czy na pewno chcesz przeprowadzić kalibrację?")
+    if result:
+        calibration_semaphore.acquire()  # Zajęcie semafora
+        threading.Thread(target=send_calibration_frame, args=(selected_port,)).start()
+
+
 def send_calibration_frame(selected_port):
     try:
         # Serial port configuration
@@ -103,6 +113,9 @@ def send_calibration_frame(selected_port):
 
     except Exception as e:
         messagebox.showerror("Błąd", "Wystąpił błąd podczas wysyłania ramki kalibracyjnej: {}".format(str(e)))
+
+    finally:
+        calibration_semaphore.release()  # Zwolnienie semafora
 
 def create_segment_vector(dane, start_i, end_i, start_j, end_j, segment_name):
     segment = []
@@ -179,9 +192,9 @@ port_dropdown.grid(row=4, column=1, padx=5, pady=5)
 button_convert = tk.Button(root, text="Konwertuj", command=lambda: resize_and_convert_to_gray(listbox_input.get(0, tk.END), entry_output.get(), motor_speed, selected_port))
 button_convert.grid(row=5, column=1, pady=10)
 
-# Dodaj przycisk kalibracji
-button_calibration = tk.Button(root, text="Kalibracja", command=lambda: send_calibration_frame(selected_port))
+button_calibration = tk.Button(root, text="Kalibracja", command=confirm_calibration)
 button_calibration.grid(row=6, column=1, pady=10)
+
 
 button_exit = tk.Button(root, text="Wyjdź", command=root.destroy)
 button_exit.grid(row=7, column=1, pady=10)
