@@ -75,12 +75,34 @@ def send_frames(segment_vectors, motor_speed, selected_port):
                 frame = prepare_frame(i, j, value, motor_speed)
                 ser.write(frame)
                 print(f"Sent frame for segment {i}, motor_id {j}, value {value}: {frame.hex().upper()}")
-                time.sleep(0.001)  # Delay between sending frames
+                time.sleep(0.001)
+                # time.sleep(0.4)  # Delay between sending frames
             except ValueError as e:
                 print(f"Error preparing frame for segment {i}, motor_id {j}, value {value}: {e}")
 
     # Close serial connection
     ser.close()
+
+def send_calibration_frame(selected_port):
+    try:
+        # Serial port configuration
+        port = selected_port.get()  # Get selected port
+        baudrate = 9600  # Change this to your baudrate
+
+        # Initialize serial connection
+        ser = serial.Serial(port, baudrate)
+        time.sleep(2)  # Wait for the serial connection to initialize
+
+        # Prepare and send calibration frame
+        calibration_frame = bytearray([0x55, 0xFF, 0xFF, 0x00, 0x00, 0xAA])  # Calibration frame data
+        ser.write(calibration_frame)  # Send calibration frame
+        print("Sent calibration frame:", calibration_frame.hex().upper())
+
+        # Close serial connection
+        ser.close()
+
+    except Exception as e:
+        messagebox.showerror("Błąd", "Wystąpił błąd podczas wysyłania ramki kalibracyjnej: {}".format(str(e)))
 
 def create_segment_vector(dane, start_i, end_i, start_j, end_j, segment_name):
     segment = []
@@ -98,12 +120,12 @@ def save_segment_vectors(segment_vectors, output_folder, filename):
     print("Segmenty zostały zapisane w pliku:", sciezka_pliku)
 
 def save_frames(segment_vectors, motor_speed, output_folder, filename):
-    sciezka_pliku = output_folder + "/{}_32x16_frames.txt".format(filename)
-    with open(sciezka_pliku, 'w') as plik:
+    sciezka_pliku = output_folder + "/{}_32x16_frames.bin".format(filename)
+    with open(sciezka_pliku, 'wb') as plik:
         for i, segment in enumerate(segment_vectors):
             for j, value in enumerate(segment):
                 frame = prepare_frame(i, j, value, motor_speed)
-                plik.write(f"{frame.hex().upper()}")
+                plik.write(frame)
     print("Ramki zostały zapisane w pliku:", sciezka_pliku)
 
 def select_input_files():
@@ -157,7 +179,11 @@ port_dropdown.grid(row=4, column=1, padx=5, pady=5)
 button_convert = tk.Button(root, text="Konwertuj", command=lambda: resize_and_convert_to_gray(listbox_input.get(0, tk.END), entry_output.get(), motor_speed, selected_port))
 button_convert.grid(row=5, column=1, pady=10)
 
+# Dodaj przycisk kalibracji
+button_calibration = tk.Button(root, text="Kalibracja", command=lambda: send_calibration_frame(selected_port))
+button_calibration.grid(row=6, column=1, pady=10)
+
 button_exit = tk.Button(root, text="Wyjdź", command=root.destroy)
-button_exit.grid(row=6, column=1, pady=10)
+button_exit.grid(row=7, column=1, pady=10)
 
 root.mainloop()
