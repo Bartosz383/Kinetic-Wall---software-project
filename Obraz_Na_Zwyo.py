@@ -113,8 +113,8 @@ class Application:
                     for i in range(4):
                         for j in range(8):
                             segment = normalized_frame[i * 4:(i + 1) * 4, j * 4:(j + 1) * 4]
-                            bit2 = i * 8 + j  # segment address
-                            bit3 = 0          # motor address (wartości od 0 do 15, iterowane w kółko)
+                            bit2 = i  # segment address
+                            bit3 = j          # motor address (wartości od 0 do 15, iterowane w kółko)
                             bit4 = np.mean(segment)  # requested motor angle; value (segment)
                             bit5 = motor_speed        # motor speed
 
