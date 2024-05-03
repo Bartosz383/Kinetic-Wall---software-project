@@ -26,9 +26,13 @@ class Application:
         # Utwórz obiekt kamery
         self.vid = Camera(video_source)
 
-        # Utwórz etykietę do wyświetlania obrazu
+        # Utwórz etykietę do wyświetlania obrazu z kamery
         self.canvas = tk.Canvas(window, width=self.vid.width, height=self.vid.height)
         self.canvas.pack()
+
+        # Utwórz etykietę do wyświetlania znormalizowanego obrazu
+        self.normalized_canvas = tk.Canvas(window, width=TARGET_WIDTH, height=TARGET_HEIGHT)
+        self.normalized_canvas.pack()
 
         # Przycisk rozpoczęcia transmisji
         self.start_btn = tk.Button(window, text="Start Transmission", width=20, command=self.start_transmission)
@@ -91,6 +95,17 @@ class Application:
             # Konwertuj klatkę na obiekt ImageTk i wyświetl na Canvas
             self.photo = ImageTk.PhotoImage(image=Image.fromarray(frame))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
+
+            # Konwertuj klatkę na monochromatyczną, przeskaluj i normalizuj
+            gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            scaled_frame = cv2.resize(gray_frame, (TARGET_WIDTH, TARGET_HEIGHT))
+            normalized_frame = cv2.normalize(scaled_frame, None, 0, 255, cv2.NORM_MINMAX)
+
+            # Wyświetl znormalizowany obraz
+            normalized_image = Image.fromarray(normalized_frame)
+            normalized_photo = ImageTk.PhotoImage(image=normalized_image)
+            self.normalized_canvas.create_image(0, 0, image=normalized_photo, anchor=tk.NW)
+            self.normalized_canvas.image = normalized_photo
 
         self.window.after(10, self.update)
 
