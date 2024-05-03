@@ -182,7 +182,7 @@ class Camera:
         if not self.vid.isOpened():
             raise ValueError("Unable to open camera")
 
-        # Ustaw rozmiar obrazu
+        # Ustaw rozmiar płótna
         self.width = int(self.vid.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
