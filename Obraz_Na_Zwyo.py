@@ -1,139 +1,192 @@
-import numpy as np
 import cv2
+import numpy as np
+import serial
+import threading
+import time
 import tkinter as tk
 from PIL import Image, ImageTk
-import serial
-import time
-import threading
-from queue import Queue
 
-class YourClassName:
-    def __init__(self):
-        self.segments = None
-        self.hex_size = None
+# Ustawienia kamerki
+CAMERA_INDEX = 0  # Indeks kamery, domyślnie 0 (pierwsza dostępna kamera)
 
-    def Module_binary(self, normalized_matrix):
-        self.segments = self.generate_segment_vectors(normalized_matrix)
+# Ustawienia przesyłania przez port szeregowy
+SERIAL_PORT = 'COM3'
+BAUD_RATE = 9600
 
-    def generate_segment_vectors(self, pattern):
-        segment_vectors = []
-        for i in range(4):
-            for j in range(8):
-                segment_name = f"segment_{i * 8 + j}"
-                segment = self.create_segment_vector(pattern, i * 4, (i + 1) * 4, j * 4, (j + 1) * 4)
-                segment = [round(value, 2) for value in segment]  # Ograniczenie do 2 miejsc po przecinku
-                segment_vectors.append((segment_name, segment))
-        return segment_vectors
+# Ustawienia obrazu
+TARGET_WIDTH = 32
+TARGET_HEIGHT = 16
 
-    def create_segment_vector(self, pattern, start_i, end_i, start_j, end_j):
-        segment = []
-        for i in range(start_i, end_i):
-            for j in range(start_j, end_j):
-                segment.append(pattern[i][j])
-        return segment
+# Klasa obsługująca główne okno aplikacji
+class Application:
+    def __init__(self, window, video_source=0):
+        self.window = window
+        self.window.title("Camera Viewer")
 
-# Funkcja do aktualizacji obrazu z kamery
-def update_camera():
-    while True:
-        ret, frame = cap.read()
+        # Utwórz obiekt kamery
+        self.vid = Camera(video_source)
+
+        # Utwórz etykietę do wyświetlania obrazu
+        self.canvas = tk.Canvas(window, width=self.vid.width, height=self.vid.height)
+        self.canvas.pack()
+
+        # Przycisk rozpoczęcia transmisji
+        self.start_btn = tk.Button(window, text="Start Transmission", width=20, command=self.start_transmission)
+        self.start_btn.pack(anchor=tk.CENTER, expand=True)
+
+        # Przycisk zakończenia transmisji
+        self.stop_btn = tk.Button(window, text="Stop Transmission", width=20, command=self.stop_transmission, state=tk.DISABLED)
+        self.stop_btn.pack(anchor=tk.CENTER, expand=True)
+
+        # Przycisk zakończenia programu
+        self.quit_button = tk.Button(window, text="Quit", width=20, command=self.quit)
+        self.quit_button.pack(anchor=tk.CENTER, expand=True)
+
+        # Pole do wprowadzania prędkości silnika
+        self.motor_speed_label = tk.Label(window, text="Motor Speed: (by zmienić należy zatrzymać transmisje)")
+        self.motor_speed_label.pack(anchor=tk.CENTER, expand=True)
+        self.motor_speed_entry = tk.Entry(window)
+        self.motor_speed_entry.pack(anchor=tk.CENTER, expand=True)
+
+        # Ustaw domyślną wartość prędkości silnika
+        self.motor_speed_entry.insert(0, "100")
+
+        self.streaming = False
+        self.thread = None
+
+        self.update()
+
+        # Obsługa zdarzenia zamknięcia okna
+        self.window.protocol("WM_DELETE_WINDOW", self.quit)
+
+    def start_transmission(self):
+        if not self.streaming:
+            # Pobierz wartość prędkości silnika z pola wprowadzania
+            motor_speed = int(self.motor_speed_entry.get())
+
+            self.streaming = True
+            self.start_btn.config(state=tk.DISABLED)
+            self.stop_btn.config(state=tk.NORMAL)
+            self.thread = threading.Thread(target=self.transmit, args=(motor_speed,))
+            self.thread.start()
+
+    def stop_transmission(self):
+        if self.streaming:
+            self.streaming = False
+            self.stop_btn.config(state=tk.DISABLED)
+            self.start_btn.config(state=tk.NORMAL)
+
+    def quit(self):
+        if self.streaming:
+            self.streaming = False
+            self.thread.join()  # Zaczekaj, aż wątek transmisji zakończy działanie
+
+        self.window.destroy()
+
+    def update(self):
+        # Pobierz klatkę z kamery
+        ret, frame = self.vid.get_frame()
+
         if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img = Image.fromarray(frame)
-            img = ImageTk.PhotoImage(image=img)
-            video_label.imgtk = img
-            video_label.config(image=img)
-            video_label.update()
-        time.sleep(0.03)  # Opóźnienie 30 ms (około 33 klatki na sekundę)
+            # Konwertuj klatkę na obiekt ImageTk i wyświetl na Canvas
+            self.photo = ImageTk.PhotoImage(image=Image.fromarray(frame))
+            self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
 
-# Funkcja do aktualizacji etykiety z segmentami
-def update_label():
-    while True:
-        ret, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        resized = cv2.resize(gray, (32, 16))
-        normalized = resized / 255.0
-        # s_binary = cv2.resize(normalized, (320, 160))
-        your_object = YourClassName()
-        your_object.Module_binary(normalized)
+        self.window.after(10, self.update)
 
-        # Aktualizacja etykiety z segmentami
-        segments_text = ""
-        if your_object.segments:
-            for segment_name, segment in your_object.segments:
-                segment_str = ", ".join(map(str, segment))
-                segments_text += f"{segment_name}: {segment_str}\n"
-                # Dodawanie danych do kolejki dla portu COM3
-                com_queue.put(segment_str)
+    def transmit(self, motor_speed):
+        try:
+            # Otwórz połączenie szeregowe
+            ser = serial.Serial(SERIAL_PORT, BAUD_RATE)
+            print("Serial port opened")
 
-        segment_label.config(text=segments_text)
-        segment_label.update()
-        time.sleep(0.03)  # Opóźnienie 30 ms (około 33 klatki na sekundę)
+            while self.streaming:
+                ret, frame = self.vid.get_frame()
 
-# Funkcja do wysyłania danych do portu szeregowego COM3
-def send_to_serial():
-    while True:
-        data = com_queue.get()
-        with serial.Serial('COM3', 9600, timeout=1) as ser:
-            ser.write(data.encode())
-            time.sleep(0.1)  # Poczekaj chwilę na wysłanie danych
+                if ret:
+                    # Konwertuj klatkę na monochromatyczną, przeskaluj i normalizuj
+                    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    scaled_frame = cv2.resize(gray_frame, (TARGET_WIDTH, TARGET_HEIGHT))
+                    normalized_frame = cv2.normalize(scaled_frame, None, 0, 255, cv2.NORM_MINMAX)
 
-# Funkcja do przygotowania ramki danych zaczynającej się od 0x55 i kończącej na 0xAA
-def prepare_frame(bit2, bit3, bit4, bit5):
-    checksum = calculate_xor_checksum(bit2, bit3, bit4, bit5)
+                    # Podziel obraz na segmenty i przekaż każdy segment do funkcji prepare_frame
+                    for i in range(4):
+                        for j in range(8):
+                            segment = normalized_frame[i * 4:(i + 1) * 4, j * 4:(j + 1) * 4]
+                            bit2 = i * 8 + j  # segment address
+                            bit3 = 0          # motor address (wartości od 0 do 15, iterowane w kółko)
+                            bit4 = np.mean(segment)  # requested motor angle; value (segment)
+                            bit5 = motor_speed        # motor speed
+
+                            # Przygotuj ramkę danych
+                            frame_data = prepare_frame(bit2, bit3, int(bit4), bit5)
+
+                            # Prześlij ramkę danych przez port szeregowy
+                            ser.write(frame_data)
+
+                time.sleep(0.1)
+
+        except serial.SerialException as e:
+            print("Error opening serial port:", e)
+
+        finally:
+            if ser.is_open:
+                ser.close()
+                print("Serial port closed")
+
+# Funkcja tworząca ramkę danych
+def prepare_frame(segment_address, motor_address, requested_motor_angle, motor_speed):
+    # Oblicz XOR checksum
+    checksum = calculate_xor_checksum(segment_address, motor_address, requested_motor_angle, motor_speed)
+
+    # Utwórz ramkę danych
     frame = bytearray([
-        0x55,  # Start
-        bit2,  # segment address
-        bit3,  # motor address
-        bit4,  # requested motor angle
-        bit5,  # motor speed
-        checksum,  # XOR checksum
-        0xAA  # Stop
+        0x55,                    # Start
+        segment_address,         # Adres segmentu
+        motor_address,           # Adres silnika (wartości od 0 do 15, iterowane w kółko)
+        requested_motor_angle,  # Wartość żądanego kąta silnika (segmentu)
+        motor_speed,             # Prędkość silnika
+        checksum,                # XOR checksum
+        0xAA                     # Stop
     ])
+
     return frame
 
-# Funkcja do obliczania XOR checksum
-def calculate_xor_checksum(bit2, bit3, bit4, bit5):
-    return bit2 ^ bit3 ^ bit4 ^ bit5
+# Funkcja obliczająca XOR checksum
+def calculate_xor_checksum(*bits):
+    # Oblicz XOR checksum dla podanych bitów
+    checksum = 0
+    for bit in bits:
+        checksum ^= bit
+    return checksum
 
-# Rejestruj obraz z kamery i wyświetlaj go na żywo
-cap = cv2.VideoCapture(0)
+# Klasa obsługująca kamerę
+class Camera:
+    def __init__(self, video_source=0):
+        self.vid = cv2.VideoCapture(video_source)
+        if not self.vid.isOpened():
+            raise ValueError("Unable to open camera")
 
-# Utwórz okno Tkinter
-root = tk.Tk()
-root.title("Segment Vector Display")
+        # Ustaw rozmiar obrazu
+        self.width = int(self.vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.height = int(self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-# Utwórz etykietę do wyświetlania segmentów
-segment_label = tk.Label(root, text="", font=("Helvetica", 12), padx=10, pady=10)
-segment_label.pack()
+    def get_frame(self):
+        if self.vid.isOpened():
+            ret, frame = self.vid.read()
+            if ret:
+                return ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            else:
+                return ret, None
+        else:
+            return None, None
 
-# Utwórz osobne okno dla obrazu z kamery
-video_window = tk.Toplevel(root)
-video_window.title("Camera Feed")
-video_label = tk.Label(video_window)
-video_label.pack()
+    def __del__(self):
+        if self.vid.isOpened():
+            self.vid.release()
 
-# Utwórz kolejkę dla portu COM3
-com_queue = Queue()
-
-# Rozpocznij aktualizację obrazu z kamery w osobnym wątku
-camera_thread = threading.Thread(target=update_camera)
-camera_thread.daemon = True
-camera_thread.start()
-
-# Rozpocznij aktualizację etykiety z segmentami w osobnym wątku
-label_thread = threading.Thread(target=update_label)
-label_thread.daemon = True
-label_thread.start()
-
-# Rozpocznij wątek do wysyłania danych do portu COM3
-serial_thread = threading.Thread(target=send_to_serial)
-serial_thread.daemon = True
-serial_thread.start()
-
-# Pętla główna Tkintera
-root.mainloop()
-
-# Zatrzymaj odczyt z kamery
-cap.release()
-cv2.destroyAllWindows()
-
+# Uruchom aplikację
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = Application(root, video_source=CAMERA_INDEX)
+    root.mainloop()
