@@ -1,6 +1,7 @@
 import tkinter as tk
 from Obraz_Na_Zwyo import Application
 from Image_To_Frame_Tool import ImageConverterApp
+from Send_To_COM_Tool import FileSenderApp
 
 def Obraz_Na_Zywo_App():
     # Utwórz nowe okno dla aplikacji
@@ -11,6 +12,9 @@ def Obraz_Na_Zywo_App():
     app = Application(new_window)
 def Obraz_Na_Ramke_App():
     app = ImageConverterApp()
+
+def Przeylanie_Ramek():
+    app = FileSenderApp()
 
 # Tworzenie głównego okna
 root = tk.Tk()
@@ -25,6 +29,9 @@ button = tk.Button(root, text="Transmisja obrazu na żywo", command=Obraz_Na_Zyw
 button.pack(pady=5)
 
 button = tk.Button(root, text="Konwersja zdjęcia na ramkę", command=Obraz_Na_Ramke_App)
+button.pack(pady=5)
+
+button = tk.Button(root, text="Przesyłanie ramek z pliku", command=Przeylanie_Ramek)
 button.pack(pady=5)
 
 # Uruchomienie pętli głównej
