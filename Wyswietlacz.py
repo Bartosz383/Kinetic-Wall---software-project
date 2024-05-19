@@ -88,6 +88,28 @@ class DisplayWindow(tk.Tk):
                 # Narysowanie sześciokąta z odpowiednim wypełnieniem
                 self.canvas.create_polygon(hexagon_coords, outline='black', fill=color)
 
+                # Pobranie wektorów segmentów i ich wypisanie
+                segment_vectors = self.get_segment_vectors()
+                for vector in segment_vectors:
+                    print(vector)
+
+    def get_segment_vectors(self):
+        # Zwraca wektory segmentów z tablicy segments
+        segment_vectors = [
+            self.create_segment_vector(self.segments, i * 4, (i + 1) * 4, j * 4, (j + 1) * 4,
+                                       f"segment_{i * 8 + j}")
+            for i in range(4)
+            for j in range(8)
+        ]
+        return segment_vectors
+
+    def create_segment_vector(self, dane, start_i, end_i, start_j, end_j, segment_name):
+        segment = []
+        for i in range(start_i, end_i):
+            for j in range(start_j, end_j):
+                segment.append(dane[i][j])
+        return segment
+
     def create_random_pattern(self):
         # Tworzenie losowego wzoru z wartościami od 0 do 255
         pattern = [[random.randint(0, 255) for _ in range(32)] for _ in range(16)]
