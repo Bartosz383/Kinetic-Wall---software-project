@@ -4,6 +4,8 @@ from tkinter import filedialog, simpledialog
 import Uzytkownik
 from PIL import ImageColor
 import random
+import serial
+import time
 
 class DisplayWindow(tk.Tk):
     def __init__(self, modul_name):
@@ -27,7 +29,10 @@ class DisplayWindow(tk.Tk):
         buttons_frame = tk.Frame(self)
         buttons_frame.grid(row=0, column=1, rowspan=5, padx=5)
 
-        self.create_button(buttons_frame, "Obraz z kamery na żywo", self.veb_cam_display)
+        # self.create_button(buttons_frame, "Wyślij ramki", self.send_frames)
+        # stwórz przycisk, który wywołuje funkcje send frames
+        # wszystkim funkcją odbierz send frames
+        # stwórz funkcje send frames dla COM3 albo daj funkcje pozwalającą na wybór portu szeregowego
         self.create_button(buttons_frame, "Rysuj", self.open_drawing_app)
         self.create_button(buttons_frame, "Ustaw wszystko na 0", self.set_all_segments_to_white)
         self.create_button(buttons_frame, "Ustaw wszystko na 1", self.set_all_segments_to_black)
@@ -42,14 +47,11 @@ class DisplayWindow(tk.Tk):
         self.create_button(buttons_frame, "Przesun w prawo", self.shift_right)
         self.create_button(buttons_frame, "Animuj", self.animate)
         self.create_button(buttons_frame, "Animuj kilka razy", self.animate_loop)
+
         # self.create_button(buttons_frame, "Zmien modul", self.zmien_modul)
 
-        self.show_display(self.hex_size)
+        # self.show_display(self.hex_size, self.send_frames)
 
-    def veb_cam_display(self):
-        from Obraz_Na_Zwyo import YourClassName
-        your_object = YourClassName()
-        your_object.show_display()
 
     def create_button(self, frame, text, command):
         button = tk.Button(frame, text=text, command=command)
@@ -92,6 +94,8 @@ class DisplayWindow(tk.Tk):
                 segment_vectors = self.get_segment_vectors()
                 for vector in segment_vectors:
                     print(vector)
+                    pass
+                # send_frames(segment_vectors, 100,"COM3")
 
     def get_segment_vectors(self):
         # Zwraca wektory segmentów z tablicy segments
@@ -109,6 +113,48 @@ class DisplayWindow(tk.Tk):
             for j in range(start_j, end_j):
                 segment.append(dane[i][j])
         return segment
+
+    def calculate_xor_checksum(self, bit2, bit3, bit4, bit5):
+        print(bit2 ^ bit3 ^ bit4 ^ bit5)
+        return bit2 ^ bit3 ^ bit4 ^ bit5
+
+    def prepare_frame(self, bit2, bit3, bit4, bit5):
+        checksum = self.calculate_xor_checksum(bit2, bit3, bit4, bit5)
+        frame = bytearray([
+            0x55,  # Start
+            bit2,  # segment address
+            bit3,  # motor address (wartości od 0 do 15, iterowane w kółko)
+            bit4,  # requested motor angle; value (segment)
+            bit5,  # motor speed
+            checksum,  # XOR checksum
+            0xAA  # Stop
+        ])
+        return frame
+
+    def send_frames(self, segment_vectors, motor_speed, selected_port):
+        # Serial port configuration
+        port = selected_port  # Change this to the selected port
+        baudrate = 9600  # Change this to your baudrate
+
+        try:
+            # Initialize serial connection
+            ser = serial.Serial(port, baudrate, timeout=1)
+            time.sleep(2)  # Wait for the serial connection to initialize
+
+            for i, segment in enumerate(segment_vectors):
+                for j, value in enumerate(segment):
+                    try:
+                        frame = self.prepare_frame(i, j, value, motor_speed)
+                        ser.write(frame)
+                        print(f"Sent frame for segment {i}, motor_id {j}, value {value}: {frame.hex().upper()}")
+                        time.sleep(0.01)  # Delay between sending frames
+                    except ValueError as e:
+                        print(f"Error preparing frame for segment {i}, motor_id {j}, value {value}: {e}")
+
+            # Close serial connection
+            ser.close()
+        except serial.SerialException as e:
+            print(f"Could not open serial port {port}: {e}")
 
     def create_random_pattern(self):
         # Tworzenie losowego wzoru z wartościami od 0 do 255
@@ -369,3 +415,4 @@ class DisplayWindow(tk.Tk):
 if __name__ == "__main__":
     display_window = DisplayWindow(modul_name="Wszystkie moduły")
     display_window.mainloop()
+
