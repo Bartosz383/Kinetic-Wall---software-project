@@ -6,6 +6,7 @@ from PIL import ImageColor
 import random
 import serial
 import time
+from functools import partial
 
 class DisplayWindow(tk.Tk):
     def __init__(self, modul_name):
@@ -33,6 +34,7 @@ class DisplayWindow(tk.Tk):
         # stwórz przycisk, który wywołuje funkcje send frames
         # wszystkim funkcją odbierz send frames
         # stwórz funkcje send frames dla COM3 albo daj funkcje pozwalającą na wybór portu szeregowego
+        self.create_button(buttons_frame, "Wyślij ramkę",partial(self.send_frames, self.segment_vectors, 100, "COM3"))
         self.create_button(buttons_frame, "Rysuj", self.open_drawing_app)
         self.create_button(buttons_frame, "Ustaw wszystko na 0", self.set_all_segments_to_white)
         self.create_button(buttons_frame, "Ustaw wszystko na 1", self.set_all_segments_to_black)
@@ -51,8 +53,6 @@ class DisplayWindow(tk.Tk):
         # self.create_button(buttons_frame, "Zmien modul", self.zmien_modul)
 
         # self.show_display(self.hex_size, self.send_frames)
-
-
     def create_button(self, frame, text, command):
         button = tk.Button(frame, text=text, command=command)
         button.pack(side="top")
@@ -167,11 +167,13 @@ class DisplayWindow(tk.Tk):
     def set_all_segments_to_white(self):
         # Ustawienie wszystkich segmentów na 0
         self.segments = [[0 for _ in range(32)] for _ in range(16)]
+        self.segment_vectors = self.get_segment_vectors()
         self.show_display(self.hex_size)
 
     def set_all_segments_to_black(self):
         # Ustawienie wszystkich segmentów na 1
         self.segments = [[255 for _ in range(32)] for _ in range(16)]
+        self.segment_vectors = self.get_segment_vectors()
         self.show_display(self.hex_size)
 
     def set_segments_to_pattern(self):
@@ -195,6 +197,7 @@ class DisplayWindow(tk.Tk):
         ]
 
         self.segments = pattern
+        self.segment_vectors = self.get_segment_vectors()
         self.show_display(self.hex_size)
 
     def animate_wave(self, col=31):
@@ -244,6 +247,7 @@ class DisplayWindow(tk.Tk):
 
         self.segments = pattern
         self.show_display(self.hex_size)
+        self.segment_vectors = self.get_segment_vectors()
 
     def Module_0_On(self):
         pattern = [
@@ -267,6 +271,7 @@ class DisplayWindow(tk.Tk):
 
         self.segments = pattern
         self.show_display(self.hex_size)
+        self.segment_vectors = self.get_segment_vectors()
 
     # def binary_pattern(self):
     #     pattern = test.binary
@@ -323,6 +328,7 @@ class DisplayWindow(tk.Tk):
 
         self.segments = pattern
         self.show_display(self.hex_size)
+        self.segment_vectors = self.get_segment_vectors()
 
     def open_drawing_app(self):
         self.drawing_app_window = tk.Toplevel(self)

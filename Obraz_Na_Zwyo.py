@@ -4,13 +4,14 @@ import serial
 import threading
 import time
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
 
 # Ustawienia kamerki
 CAMERA_INDEX = 0  # Indeks kamery, domyślnie 0 (pierwsza dostępna kamera)
 
+# SERIAL_PORT = 'COM3'
 # Ustawienia przesyłania przez port szeregowy
-SERIAL_PORT = 'COM3'
 BAUD_RATE = 9600
 
 # Ustawienia obrazu
@@ -55,6 +56,12 @@ class Application:
         # Ustaw domyślną wartość prędkości silnika
         self.motor_speed_entry.insert(0, "100")
 
+        # Rozwijane menu do wyboru portu COM
+        self.serial_port_label = tk.Label(window, text="Select Serial Port:")
+        self.serial_port_label.pack(anchor=tk.CENTER, expand=True)
+        self.serial_port_combobox = ttk.Combobox(window, values=self.get_serial_ports())
+        self.serial_port_combobox.pack(anchor=tk.CENTER, expand=True)
+
         self.streaming = False
         self.thread = None
 
@@ -63,15 +70,24 @@ class Application:
         # Obsługa zdarzenia zamknięcia okna
         self.window.protocol("WM_DELETE_WINDOW", self.quit)
 
+    def get_serial_ports(self):
+        # Zwróć listę portów COM od COM1 do COM100
+        return [f'COM{i}' for i in range(1, 101)]
+
     def start_transmission(self):
         if not self.streaming:
+            selected_port = self.serial_port_combobox.get()
+            if not selected_port:
+                tk.messagebox.showerror("Error", "Please select a serial port")
+                return
+
             # Pobierz wartość prędkości silnika z pola wprowadzania
             motor_speed = int(self.motor_speed_entry.get())
 
             self.streaming = True
             self.start_btn.config(state=tk.DISABLED)
             self.stop_btn.config(state=tk.NORMAL)
-            self.thread = threading.Thread(target=self.transmit, args=(motor_speed,))
+            self.thread = threading.Thread(target=self.transmit, args=(selected_port, motor_speed,))
             self.thread.start()
 
     def stop_transmission(self):
@@ -109,10 +125,10 @@ class Application:
 
         self.window.after(10, self.update)
 
-    def transmit(self, motor_speed):
+    def transmit(self, serial_port, motor_speed):
         try:
             # Otwórz połączenie szeregowe
-            ser = serial.Serial(SERIAL_PORT, BAUD_RATE)
+            ser = serial.Serial(serial_port, BAUD_RATE)
             print("Serial port opened")
 
             while self.streaming:
@@ -139,7 +155,7 @@ class Application:
                             # Prześlij ramkę danych przez port szeregowy
                             ser.write(frame_data)
 
-                time.sleep(0.1)
+                time.sleep(1)
 
         except serial.SerialException as e:
             print("Error opening serial port:", e)
